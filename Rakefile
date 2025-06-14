@@ -191,6 +191,9 @@ begin
     config.project = 'beaker'
     gem_version = Gem::Specification.load("#{config.project}.gemspec").version
     config.future_release = gem_version
+    config.release_branch = 'master'
+    config.exclude_tags_regex = /\A4\./
+    config.since_tag = '5.7.0'
   end
 rescue LoadError
   # Optional group in bundler

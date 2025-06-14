@@ -1,58 +1,86 @@
 # Changelog
 
-## [6.7.0](https://github.com/voxpupuli/beaker/tree/6.6.0) (2025-05-28)
+## [6.8.0](https://github.com/voxpupuli/beaker/tree/6.8.0) (2025-06-14)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.7.0...6.8.0)
 
 **Implemented enhancements:**
 
-- Fix some doc issues [\#1916](https://github.com/voxpupuli/beaker/pull/1916)
-- Add Ruby 3.4 support [\#1917](https://github.com/voxpupuli/beaker/pull/1917)
-- Add benchmark dependency for Ruby 3.5 support [\#1920](https://github.com/voxpupuli/beaker/pull/1920)
-- fakefs: Allow 3.x [\#1918](https://github.com/voxpupuli/beaker/pull/1918)
-- voxpupuli-rubocop: Update 3.0.0->3.1.0 [\#1921](https://github.com/voxpupuli/beaker/pull/1921)
+- base64: Allow \<1 [\#1931](https://github.com/voxpupuli/beaker/pull/1931) ([bastelfreak](https://github.com/bastelfreak))
 
 **Fixed bugs:**
 
-- Fix macOS package installation when DMG content differs from filename [\#1915](https://github.com/voxpupuli/beaker/pull/1915)
-- Fix wrong parameter assignment in multiple places [\#1926](https://github.com/voxpupuli/beaker/pull/1926)
+- \(\#1928\) Prevented regex meant for EOL OS flavors matching el-10 [\#1929](https://github.com/voxpupuli/beaker/pull/1929) ([michael-riddle](https://github.com/michael-riddle))
+
+## [6.7.0](https://github.com/voxpupuli/beaker/tree/6.7.0) (2025-05-28)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.6.0...6.7.0)
+
+**Implemented enhancements:**
+
+- Add `benchmark` dependency for Ruby 3.5 support [\#1920](https://github.com/voxpupuli/beaker/pull/1920) ([bastelfreak](https://github.com/bastelfreak))
+- fakefs: Allow 3.x [\#1918](https://github.com/voxpupuli/beaker/pull/1918) ([bastelfreak](https://github.com/bastelfreak))
+- Add Ruby 3.4 support [\#1917](https://github.com/voxpupuli/beaker/pull/1917) ([bastelfreak](https://github.com/bastelfreak))
+- Fix some doc issues [\#1916](https://github.com/voxpupuli/beaker/pull/1916) ([lbetz](https://github.com/lbetz))
+
+**Fixed bugs:**
+
+- Fix wrong parameter assignment in multiple places [\#1926](https://github.com/voxpupuli/beaker/pull/1926) ([bastelfreak](https://github.com/bastelfreak))
+- Fix macOS package installation when DMG content differs from filename [\#1915](https://github.com/voxpupuli/beaker/pull/1915) ([gavindidrichsen](https://github.com/gavindidrichsen))
 
 ## [6.6.0](https://github.com/voxpupuli/beaker/tree/6.6.0) (2025-03-27)
 
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.5.0...6.6.0)
+
 **Implemented enhancements:**
 
-- Changes to add powershell commands as wmic is deprecated in windows [\#1907](https://github.com/voxpupuli/beaker/pull/1907)
+- Changes to add powershell commands as wmic is deprecated in windows 2025 [\#1907](https://github.com/voxpupuli/beaker/pull/1907) ([skyamgarp](https://github.com/skyamgarp))
 
 ## [6.5.0](https://github.com/voxpupuli/beaker/tree/6.5.0) (2025-03-18)
 
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.4.1...6.5.0)
+
 **Implemented enhancements:**
 
-* Add support for amazonfips [\#1908](https://github.com/voxpupuli/beaker/pull/1908)
-* Allow minitar 1.x [\#1910](https://github.com/voxpupuli/beaker/pull/1910)
+- \(\#1896\) Allow minitar 1.x [\#1910](https://github.com/voxpupuli/beaker/pull/1910) ([bastelfreak](https://github.com/bastelfreak))
+- \(PA-7210\) Add support for amazonfips [\#1908](https://github.com/voxpupuli/beaker/pull/1908) ([shubhamshinde360](https://github.com/shubhamshinde360))
 
 ## [6.4.1](https://github.com/voxpupuli/beaker/tree/6.4.1) (2024-08-27)
 
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.4.0...6.4.1)
+
 **Fixed bugs:**
 
-- platform: don't install curl-minimal on EL family [\#1902](https://github.com/voxpupuli/beaker/pull/1902)
+- platform: don't install `curl-minimal` on EL family [\#1902](https://github.com/voxpupuli/beaker/pull/1902) ([kenyon](https://github.com/kenyon))
 
 ## [6.4.0](https://github.com/voxpupuli/beaker/tree/6.4.0) (2024-08-27)
 
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.3.0...6.4.0)
+
 **Implemented enhancements:**
 
-- Only install timesync packages if needed [\#1853](https://github.com/voxpupuli/beaker/pull/1853)
-- Ensure platform is Beaker::Platform in tests [\#1855](https://github.com/voxpupuli/beaker/pull/1855)
-- Avoid mocking stdout on host and use explicit hosts in host_prebuilt_steps_spec.rb [\#1900](https://github.com/voxpupuli/beaker/pull/1900)
+- Only install timesync packages if needed [\#1853](https://github.com/voxpupuli/beaker/pull/1853) ([ekohl](https://github.com/ekohl))
+
+**Merged pull requests:**
+
+- Avoid mocking stdout on host and use explicit hosts in host\_prebuilt\_steps\_spec.rb [\#1900](https://github.com/voxpupuli/beaker/pull/1900) ([ekohl](https://github.com/ekohl))
+- Ensure platform is Beaker::Platform in tests [\#1855](https://github.com/voxpupuli/beaker/pull/1855) ([ekohl](https://github.com/ekohl))
 
 ## [6.3.0](https://github.com/voxpupuli/beaker/tree/6.3.0) (2024-08-13)
 
-**Implemented enhancements:**
-
-- build(deps): update minitar requirement from ~> 0.6 to ~> 0.12 [\#1895](https://github.com/voxpupuli/beaker/pull/1895)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.2.0...6.3.0)
 
 **Fixed bugs:**
 
 - Arch Linux: Generate keyring before installing packages [\#1897](https://github.com/voxpupuli/beaker/pull/1897) ([bastelfreak](https://github.com/bastelfreak))
 
-## [6.2.0](https://github.com/voxpupuli/beaker/tree/6.2.0) (2024-07-24)
+**Merged pull requests:**
+
+- build\(deps\): update minitar requirement from ~\> 0.6 to ~\> 0.12 [\#1895](https://github.com/voxpupuli/beaker/pull/1895) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [6.2.0](https://github.com/voxpupuli/beaker/tree/6.2.0) (2024-08-03)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.1.0...6.2.0)
 
 **Implemented enhancements:**
 
@@ -62,27 +90,35 @@
 
 - EL8/9 & Fedora: Install iputils [\#1893](https://github.com/voxpupuli/beaker/pull/1893) ([bastelfreak](https://github.com/bastelfreak))
 
+**Merged pull requests:**
+
+- CI: Update CentOS7-\>CentOS9 [\#1891](https://github.com/voxpupuli/beaker/pull/1891) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [6.1.0](https://github.com/voxpupuli/beaker/tree/6.1.0) (2024-06-04)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.0.0...6.1.0)
 
 **Implemented enhancements:**
 
-- Add package logic for Amazon Linux 2 [\#1887](https://github.com/voxpupuli/beaker/pull/1884) ([mhashizume](https://github.com/joshcooper))
+- Add full Amazon 2 support [\#1887](https://github.com/voxpupuli/beaker/pull/1887) ([joshcooper](https://github.com/joshcooper))
 
-## [6.0.0](https://github.com/voxpupuli/beaker/tree/6.0.0) (2024-05-24)
+## [6.0.0](https://github.com/voxpupuli/beaker/tree/6.0.0) (2024-05-28)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.8.1...6.0.0)
 
 **Breaking changes:**
 
-- Drop EoL F5 support [\#1866](https://github.com/voxpupuli/beaker/pull/1866) ([bastelfreak](https://github.com/bastelfreak))
-- Drop EoL cumulus support [\#1867](https://github.com/voxpupuli/beaker/pull/1867) ([bastelfreak](https://github.com/bastelfreak))
-- drop sys-v leftovers; assume systemctl is available for unknown platforms [\#1868](https://github.com/voxpupuli/beaker/pull/1868) ([bastelfreak](https://github.com/bastelfreak))
-- Drop EoL huaweios support [\#1869](https://github.com/voxpupuli/beaker/pull/1869) ([bastelfreak](https://github.com/bastelfreak))
-- Drop EoL EL4 support [\#1870](https://github.com/voxpupuli/beaker/pull/1870) ([bastelfreak](https://github.com/bastelfreak))
-- Drop support for EoL Debian/Ubuntu versions [\#1871](https://github.com/voxpupuli/beaker/pull/1871) ([bastelfreak](https://github.com/bastelfreak))
-- Drop EoL cisco support [\#1872](https://github.com/voxpupuli/beaker/pull/1872) ([bastelfreak](https://github.com/bastelfreak))
-- Drop Fedora < 22 support [\#1873](https://github.com/voxpupuli/beaker/pull/1873) ([ekohl](https://github.com/ekohl))
-- Drop EoL Arista EOS support [\#1874](https://github.com/voxpupuli/beaker/pull/1874) ([bastelfreak](https://github.com/bastelfreak))
-- drop validate_setup method [\#1875](https://github.com/voxpupuli/beaker/pull/1875) ([bastelfreak](https://github.com/bastelfreak))
 - Drop EoL netscaler support [\#1876](https://github.com/voxpupuli/beaker/pull/1876) ([bastelfreak](https://github.com/bastelfreak))
+- drop validate\_setup method [\#1875](https://github.com/voxpupuli/beaker/pull/1875) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL Arista EOS support [\#1874](https://github.com/voxpupuli/beaker/pull/1874) ([bastelfreak](https://github.com/bastelfreak))
+- Drop Fedora \< 22 support [\#1873](https://github.com/voxpupuli/beaker/pull/1873) ([ekohl](https://github.com/ekohl))
+- Drop EoL cisco support [\#1872](https://github.com/voxpupuli/beaker/pull/1872) ([bastelfreak](https://github.com/bastelfreak))
+- Drop support for EoL Debian/Ubuntu versions [\#1871](https://github.com/voxpupuli/beaker/pull/1871) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL EL4 support [\#1870](https://github.com/voxpupuli/beaker/pull/1870) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL huaweios support [\#1869](https://github.com/voxpupuli/beaker/pull/1869) ([bastelfreak](https://github.com/bastelfreak))
+- drop sys-v leftovers; assume systemctl is available for unknown platforms [\#1868](https://github.com/voxpupuli/beaker/pull/1868) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL cumulus support  [\#1867](https://github.com/voxpupuli/beaker/pull/1867) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL F5 support [\#1866](https://github.com/voxpupuli/beaker/pull/1866) ([bastelfreak](https://github.com/bastelfreak))
 
 **Implemented enhancements:**
 
@@ -94,179 +130,25 @@
 
 ## [5.8.1](https://github.com/voxpupuli/beaker/tree/5.8.1) (2024-05-06)
 
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.8.0...5.8.1)
+
 **Fixed bugs:**
 
 - Add extension parameter to parent tmpfile method signature [\#1863](https://github.com/voxpupuli/beaker/pull/1863) ([ekohl](https://github.com/ekohl))
 
-## [5.8.0](https://github.com/voxpupuli/beaker/tree/5.8.0) (2024-03-23)
+## [5.8.0](https://github.com/voxpupuli/beaker/tree/5.8.0) (2024-03-22)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.7.0...5.8.0)
 
 **Implemented enhancements:**
 
 - Add Ruby 3.3 support [\#1859](https://github.com/voxpupuli/beaker/pull/1859) ([bastelfreak](https://github.com/bastelfreak))
+- PE-37978: Add 'amazon' to \#repo-filename method [\#1858](https://github.com/voxpupuli/beaker/pull/1858) ([span786](https://github.com/span786))
 - Do not attempt to install curl on DNF-based distros [\#1854](https://github.com/voxpupuli/beaker/pull/1854) ([ekohl](https://github.com/ekohl))
-- PE-37978: Add 'amazon' to #repo-filename method [\#1858](https://github.com/voxpupuli/beaker/pull/1858) ([span786](https://github.com/span786))
 
 **Fixed bugs:**
 
-- CLI: Fix typo: opton->option [\#1849](https://github.com/voxpupuli/beaker/pull/1849) ([bastelfreak](https://github.com/bastelfreak))
-
-**Others:**
-
-- build(deps-dev): update voxpupuli-rubocop requirement from ~> 2.4.0 to ~> 2.6.0 [\#1850](https://github.com/voxpupuli/beaker/pull/1850) (dependabot)
-
-## [5.7.0](https://github.com/voxpupuli/beaker/tree/5.7.0) (2024-02-13)
-
-**Implemented enhancements:**
-
-- Add Ubuntu 24.04 noble codename [\#1847](https://github.com/voxpupuli/beaker/pull/1847) ([h0tw1r3](https://github.com/h0tw1r3))
-
-## [5.6.0](https://github.com/voxpupuli/beaker/tree/5.6.0) (2023-11-23)
-
-**Implemented enhancements:**
-
-- Use DNF for Amazon Linux 2023 [\#1832](https://github.com/voxpupuli/beaker/pull/1832) ([mhashizume](https://github.com/mhashizume))
-- Use DNF for Fedora, newer Enterprise Linux [\#1835](https://github.com/voxpupuli/beaker/pull/1835) ([mhashizume](https://github.com/mhashizume))
-
-**Fixed bugs:**
-
-- Permit PlatformTagContainer class for beaker hosts [\#1833](https://github.com/voxpupuli/beaker/pull/1833) ([tlehman](https://github.com/tlehman))
-
-## [5.5.0](https://github.com/voxpupuli/beaker/tree/5.5.0) (2023-10-02)
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.4.0...5.5.0)
-
-**Implemented enhancements:**
-
-- Allow amazon as a platform [\#1824](https://github.com/voxpupuli/beaker/pull/1824) ([yachub](https://github.com/yachub))
-
-## [5.4.0](https://github.com/voxpupuli/beaker/tree/5.4.0) (2023-09-12)
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.3.0...5.4.0)
-
-**Implemented enhancements:**
-
-- \(RE-15540\) Add Debian 12\/13\/14 support [\#1822](https://github.com/voxpupuli/beaker/pull/1822) ([yachub](https://github.com/yachub))
-
-## [5.3.1](https://github.com/voxpupuli/beaker/tree/5.3.1) (2023-07-26)
-
-**Fixed bugs:**
-
-- Fix Minitest capitalization [\#1819](https://github.com/voxpupuli/beaker/pull/1819) ([mhashizume](https://github.com/mhashizume))
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.3.0...5.3.1)
-
-## [5.3.0](https://github.com/voxpupuli/beaker/tree/5.3.0) (2023-06-06)
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.2.0...5.3.0)
-
-**Implemented enhancements:**
-
-- Add bcrypt\_pbkdf to fix ed25519 ssh keys support [\#1810](https://github.com/voxpupuli/beaker/pull/1810) ([jay7x](https://github.com/jay7x))
-
-**Merged pull requests:**
-
-- rubocop: autofix [\#1816](https://github.com/voxpupuli/beaker/pull/1816) ([bastelfreak](https://github.com/bastelfreak))
-- GCG: Add missing faraday dependency [\#1815](https://github.com/voxpupuli/beaker/pull/1815) ([bastelfreak](https://github.com/bastelfreak))
-- Build gems with verbosity and strictness [\#1811](https://github.com/voxpupuli/beaker/pull/1811) ([bastelfreak](https://github.com/bastelfreak))
-
-## [5.2.0](https://github.com/voxpupuli/beaker/tree/5.2.0) (2023-04-28)
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.1.0...5.2.0)
-
-**Implemented enhancements:**
-
-- Declare API interface on Beaker::Host [\#1806](https://github.com/voxpupuli/beaker/pull/1806) ([ekohl](https://github.com/ekohl))
-- Switch to voxpupuli-rubocop [\#1804](https://github.com/voxpupuli/beaker/pull/1804) ([bastelfreak](https://github.com/bastelfreak))
-- Support an extension to tmpfile [\#1735](https://github.com/voxpupuli/beaker/pull/1735) ([ekohl](https://github.com/ekohl))
-
-**Fixed bugs:**
-
-- Use systemctl to restart SSH on EL9 [\#1808](https://github.com/voxpupuli/beaker/pull/1808) ([ekohl](https://github.com/ekohl))
-
-**Closed issues:**
-
-- Failed to exec 'vagrant up' \(rbenv, ruby 2.7.6, bundler 2.3.19, virtualbox\) [\#1752](https://github.com/voxpupuli/beaker/issues/1752)
-- EL 9 error - /sbin/service: No such file or directory [\#1751](https://github.com/voxpupuli/beaker/issues/1751)
-
-**Merged pull requests:**
-
-- Disable RSpec/IndexedLet [\#1807](https://github.com/voxpupuli/beaker/pull/1807) ([ekohl](https://github.com/ekohl))
-- Drop legacy yard tasks [\#1805](https://github.com/voxpupuli/beaker/pull/1805) ([bastelfreak](https://github.com/bastelfreak))
-- Enhance documentation about roles [\#1800](https://github.com/voxpupuli/beaker/pull/1800) ([rwaffen](https://github.com/rwaffen))
-
-## [5.1.0](https://github.com/voxpupuli/beaker/tree/5.1.0) (2023-03-27)
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.0.0...5.1.0)
-
-**Implemented enhancements:**
-
-- Introduce shareable rubocop config [\#1795](https://github.com/voxpupuli/beaker/pull/1795) ([bastelfreak](https://github.com/bastelfreak))
-
-## [5.0.0](https://github.com/voxpupuli/beaker/tree/5.0.0) (2023-03-24)
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.39.0...5.0.0)
-
-**Breaking changes:**
-
-- Remove install\_puppet\_agent\_\* methods [\#1775](https://github.com/voxpupuli/beaker/pull/1775) ([ekohl](https://github.com/ekohl))
-- Update fakefs requirement from ~\> 1.0 to ~\> 2.4 [\#1770](https://github.com/voxpupuli/beaker/pull/1770) ([dependabot[bot]](https://github.com/apps/dependabot))
-- Drop deprecated methods [\#1769](https://github.com/voxpupuli/beaker/pull/1769) ([ekohl](https://github.com/ekohl))
-- Drop Ruby 2.4/2.5/2.6 support [\#1767](https://github.com/voxpupuli/beaker/pull/1767) ([bastelfreak](https://github.com/bastelfreak))
-- \(maint\) Removes open\_uri\_redirections [\#1764](https://github.com/voxpupuli/beaker/pull/1764) ([mhashizume](https://github.com/mhashizume))
-- Remove add-el-extras, passenger, proxy\_config, disable\_iptables and clean up code [\#1731](https://github.com/voxpupuli/beaker/pull/1731) ([ekohl](https://github.com/ekohl))
-
-**Implemented enhancements:**
-
-- Drop rspec-its dependency in favor of have\_attributes [\#1788](https://github.com/voxpupuli/beaker/pull/1788) ([ekohl](https://github.com/ekohl))
-- Add Ruby 3.2 support [\#1762](https://github.com/voxpupuli/beaker/pull/1762) ([ekohl](https://github.com/ekohl))
-
-**Fixed bugs:**
-
-- 4.39.0 breaks beaker-puppet tests [\#1772](https://github.com/voxpupuli/beaker/issues/1772)
-
-**Merged pull requests:**
-
-- Use send instead of instance\_eval [\#1793](https://github.com/voxpupuli/beaker/pull/1793) ([ekohl](https://github.com/ekohl))
-- rubocop: Fix more Style cops [\#1792](https://github.com/voxpupuli/beaker/pull/1792) ([bastelfreak](https://github.com/bastelfreak))
-- Rubocop: Fix more Style cops [\#1791](https://github.com/voxpupuli/beaker/pull/1791) ([bastelfreak](https://github.com/bastelfreak))
-- Rubocop: Fix multiple Layout cops [\#1790](https://github.com/voxpupuli/beaker/pull/1790) ([bastelfreak](https://github.com/bastelfreak))
-- Add a CI job we can enforce in branch protection [\#1789](https://github.com/voxpupuli/beaker/pull/1789) ([bastelfreak](https://github.com/bastelfreak))
-- rubocop: disable Gemspec/DevelopmentDependencies [\#1787](https://github.com/voxpupuli/beaker/pull/1787) ([bastelfreak](https://github.com/bastelfreak))
-- Release pipeline: Dont install optional gems [\#1786](https://github.com/voxpupuli/beaker/pull/1786) ([bastelfreak](https://github.com/bastelfreak))
-- CI: Run on merges to master [\#1785](https://github.com/voxpupuli/beaker/pull/1785) ([bastelfreak](https://github.com/bastelfreak))
-- Run acceptance tests in CI [\#1784](https://github.com/voxpupuli/beaker/pull/1784) ([ekohl](https://github.com/ekohl))
-- Update in-parallel requirement from ~\> 0.1 to \>= 0.1, \< 2.0 [\#1783](https://github.com/voxpupuli/beaker/pull/1783) ([dependabot[bot]](https://github.com/apps/dependabot))
-- Update rubocop-rspec requirement from ~\> 2.18.1 to ~\> 2.19.0 [\#1781](https://github.com/voxpupuli/beaker/pull/1781) ([dependabot[bot]](https://github.com/apps/dependabot))
-- Update rubocop requirement from ~\> 1.47.0 to ~\> 1.48.0 [\#1780](https://github.com/voxpupuli/beaker/pull/1780) ([dependabot[bot]](https://github.com/apps/dependabot))
-- dependabot: check for github actions as well [\#1779](https://github.com/voxpupuli/beaker/pull/1779) ([bastelfreak](https://github.com/bastelfreak))
-- RuboCop: Fix Layout cops [\#1778](https://github.com/voxpupuli/beaker/pull/1778) ([bastelfreak](https://github.com/bastelfreak))
-- Fix more rubocop violations [\#1777](https://github.com/voxpupuli/beaker/pull/1777) ([bastelfreak](https://github.com/bastelfreak))
-- Use Enumerable\#all? [\#1776](https://github.com/voxpupuli/beaker/pull/1776) ([ekohl](https://github.com/ekohl))
-- Do not include Unix::Exec on Windows::Exec tests [\#1774](https://github.com/voxpupuli/beaker/pull/1774) ([ekohl](https://github.com/ekohl))
-- Update rubocop requirement from ~\> 1.45.0 to ~\> 1.47.0 [\#1773](https://github.com/voxpupuli/beaker/pull/1773) ([dependabot[bot]](https://github.com/apps/dependabot))
-- rubocop: Fix commas and whitespace and newlines [\#1768](https://github.com/voxpupuli/beaker/pull/1768) ([bastelfreak](https://github.com/bastelfreak))
-- CI: Use latest actions/checkout version [\#1766](https://github.com/voxpupuli/beaker/pull/1766) ([bastelfreak](https://github.com/bastelfreak))
-
-## [4.39.0](https://github.com/voxpupuli/beaker/tree/4.39.0) (2023-02-18)
-
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.38.1...4.39.0)
-
-**Implemented enhancements:**
-
-- \(maint\) StringInclude Rubocop corrections [\#1765](https://github.com/voxpupuli/beaker/pull/1765) ([mhashizume](https://github.com/mhashizume))
-- Add Rubocop [\#1761](https://github.com/voxpupuli/beaker/pull/1761) ([ekohl](https://github.com/ekohl))
-
-**Fixed bugs:**
-
-- Extend list of permitted classes for YAML safe load and allow aliases [\#1758](https://github.com/voxpupuli/beaker/pull/1758) ([nmburgan](https://github.com/nmburgan))
-
-**Closed issues:**
-
-- Ruby 3.1/Psych 4 compatibility issues [\#1753](https://github.com/voxpupuli/beaker/issues/1753)
-
-**Merged pull requests:**
-
-- Update net-scp requirement from \>= 1.2, \< 4.0 to \>= 1.2, \< 5.0 [\#1757](https://github.com/voxpupuli/beaker/pull/1757) ([dependabot[bot]](https://github.com/apps/dependabot))
+- CLI: Fix typo: opton-\>option [\#1849](https://github.com/voxpupuli/beaker/pull/1849) ([bastelfreak](https://github.com/bastelfreak))
 
 ## [4.38.1](https://github.com/voxpupuli/beaker/tree/4.38.1) (2022-09-21)
 
