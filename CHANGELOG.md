@@ -1,6 +1,14 @@
 # Changelog
 
-## [6.8.0](https://github.com/voxpupuli/beaker/tree/6.8.0) (2025-06-14)
+## [6.8.1](https://github.com/voxpupuli/beaker/tree/6.8.1) (2025-06-16)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.8.0...6.8.1)
+
+**Fixed bugs:**
+
+- Use systemd to reload ssh during host prebuilt on RHEL10 [\#1933](https://github.com/voxpupuli/beaker/pull/1933) ([matejzero](https://github.com/matejzero))
+
+## [6.8.0](https://github.com/voxpupuli/beaker/tree/6.8.0) (2025-06-15)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/6.7.0...6.8.0)
 
