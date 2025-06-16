@@ -82,7 +82,7 @@ describe Beaker do
     ]
   end
 
-  ['centos-9-64', 'el-9-64', 'redhat-9-64', 'fedora-39-64'].each do |redhat_like|
+  ['centos-9-64', 'el-9-64', 'el-10-64', 'redhat-9-64', 'redhat-10-64', 'fedora-39-64'].each do |redhat_like|
     it_behaves_like 'enables_root_login', redhat_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo -E systemctl restart sshd.service",

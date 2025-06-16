@@ -328,10 +328,10 @@ module Beaker
         # restart sshd
         if /debian|ubuntu/.match?(host['platform'])
           host.exec(Command.new("sudo su -c \"service ssh restart\""), { :pty => true })
-        elsif /amazon|arch|(centos|el|redhat)-[789]|fedora/.match?(host['platform'])
-          host.exec(Command.new("sudo -E systemctl restart sshd.service"), { :pty => true })
-        elsif /centos|el-|redhat/.match?(host['platform'])
+        elsif /(el|centos|redhat|oracle|scientific)-[0-6]\b/.match?(host['platform'])
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), { :pty => true })
+        elsif /amazon|arch|centos|el|redhat|fedora/.match?(host['platform'])
+          host.exec(Command.new("sudo -E systemctl restart sshd.service"), { :pty => true })
         elsif /(free|open)bsd/.match?(host['platform'])
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         elsif host['platform'].include?('solaris')
