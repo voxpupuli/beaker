@@ -119,7 +119,7 @@ module Beaker
         AMAZON2023_PACKAGES
       when /el-8/
         RHEL8_PACKAGES
-      when /el-9/
+      when /el-(9|[1-9][0-9])/
         RHEL9_PACKAGES
       when /sles-10/
         SLES10_PACKAGES
