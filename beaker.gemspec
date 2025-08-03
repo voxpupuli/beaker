@@ -47,6 +47,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'thor', ['>= 1.0.1', '< 2.0']
 
   # Run time dependencies that are Beaker libraries
-  s.add_dependency 'beaker-hostgenerator', '~> 2.0'
+  s.add_dependency 'beaker-hostgenerator', '~> 3.0'
   s.add_dependency 'stringify-hash', '~> 0.0'
 end
