@@ -16,13 +16,13 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.required_ruby_version = Gem::Requirement.new('>= 2.7')
+  s.required_ruby_version = Gem::Requirement.new('>= 3.2')
 
   # Testing dependencies
   s.add_development_dependency 'fakefs', '>= 2.4', '< 4'
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'voxpupuli-rubocop', '~> 3.1.0'
+  s.add_development_dependency 'voxpupuli-rubocop', '~> 4.1.0'
 
   # Run time dependencies
   # Required for Ruby 3.3+ support

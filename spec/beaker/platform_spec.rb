@@ -140,7 +140,7 @@ module Beaker
         if YAML.respond_to?(:unsafe_load)
           YAML.unsafe_load(YAML.dump(platform))
         else
-          YAML.load(YAML.dump(platform)) # rubocop:disable Security/YAMLLoad
+          YAML.load(YAML.dump(platform))
         end
       end
 

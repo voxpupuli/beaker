@@ -1,9 +1,9 @@
 module Beaker
   module Shared
     module Repetition
-      def repeat_for seconds, &block
+      def repeat_for(seconds, &)
         # do not peg CPU if &block takes less than 1 second
-        repeat_for_and_wait seconds, 1, &block
+        repeat_for_and_wait(seconds, 1, &)
       end
 
       def repeat_for_and_wait seconds, wait

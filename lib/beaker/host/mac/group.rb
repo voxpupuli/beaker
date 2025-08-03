@@ -83,8 +83,8 @@ module Mac::Group
   #
   # @param [String] name Name of the group
   # @param [Proc] block Additional actions or insertions
-  def group_absent(name, &block)
-    execute("if dscl . -list /Groups/#{name}; then dscl . -delete /Groups/#{name}; fi", {}, &block)
+  def group_absent(name, &)
+    execute("if dscl . -list /Groups/#{name}; then dscl . -delete /Groups/#{name}; fi", {}, &)
   end
 
   # Gives the next gid not used on the system
