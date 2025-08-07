@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.0.0](https://github.com/voxpupuli/beaker/tree/7.0.0) (2025-08-07)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.8.1...7.0.0)
+
+**Breaking changes:**
+
+- Require Ruby 3.2 [\#1906](https://github.com/voxpupuli/beaker/pull/1906) ([bastelfreak](https://github.com/bastelfreak))
+
+**Implemented enhancements:**
+
+- beaker-hostgenerator: Switch to 3.x [\#1937](https://github.com/voxpupuli/beaker/pull/1937) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [6.8.1](https://github.com/voxpupuli/beaker/tree/6.8.1) (2025-06-16)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/6.8.0...6.8.1)
