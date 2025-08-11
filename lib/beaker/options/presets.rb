@@ -187,7 +187,7 @@ module Beaker
                   :use_fog_credentials => true,
                   :ssh => {
                     :config => false,
-                    :verify_host_key => false,
+                    :verify_host_key => :never,
                     :auth_methods => ["publickey"],
                     :port => 22,
                     :forward_agent => true,

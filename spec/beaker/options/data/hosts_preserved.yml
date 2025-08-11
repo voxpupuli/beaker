@@ -72,7 +72,7 @@
 :use_fog_credentials: true
 :ssh: !ruby/hash:Beaker::Options::OptionsHash
   :config: true
-  :verify_host_key: false
+  :verify_host_key: :never
   :auth_methods: &7
   - publickey
   :port: 22
@@ -360,7 +360,7 @@
   :use_fog_credentials: true
   :ssh: !ruby/hash:Beaker::Options::OptionsHash
     :config: true
-    :verify_host_key: false
+    :verify_host_key: :never
     :auth_methods: *7
     :port: 22
     :forward_agent: 'true'
