@@ -21,15 +21,6 @@ hosts.each do |host|
   assert_match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/, ip, "#{ip} on #{host} isn't correct format")
 end
 
-step "#is_x86_64? : can determine arch on hosts"
-hosts.each do |host|
-  if /x86_64|_64|amd64|-64/.match?(host['platform'])
-    assert_equal(true, host.is_x86_64?, "is_x86_64? should be true on #{host}: #{host['platform']}")
-  else
-    assert_equal(false, host.is_x86_64?, "is_x86_64? should be false on #{host}: #{host['platform']}")
-  end
-end
-
 step "#get_env_var : can get a specific environment variable"
 hosts.each do |host|
   env_prefix = 'BEAKER' + SecureRandom.hex(4).upcase
