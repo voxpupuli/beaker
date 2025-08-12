@@ -629,7 +629,7 @@ module Beaker
         # since were using fakefs we need to create the file and directories
         FileUtils.mkdir_p('/var/folders/v0/')
         FileUtils.touch('/var/folders/v0/centos-64-x6420150625-48025-lu3u86')
-        rsync_args = ['source', 'target', ['-az', "-e \"ssh -F /var/folders/v0/centos-64-x6420150625-48025-lu3u86 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
+        rsync_args = ['source', 'target', ['-az', "-e \"ssh -F /var/folders/v0/centos-64-x6420150625-48025-lu3u86 -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
         expect(Rsync).to receive(:run).with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
         expect(host.do_rsync_to(*args).success?).to eq(true)
       end
@@ -639,7 +639,7 @@ module Beaker
         create_files(['source'])
         args = ['source', 'target',
                 { :ignore => ['.bundle'] },]
-        rsync_args = ['source', 'target', ['-az', "-e \"ssh -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
+        rsync_args = ['source', 'target', ['-az', "-e \"ssh -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
         expect(Rsync).to receive(:run).with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
         expect(host.do_rsync_to(*args).success?).to eq(true)
       end
