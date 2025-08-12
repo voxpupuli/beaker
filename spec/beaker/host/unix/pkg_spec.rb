@@ -341,15 +341,6 @@ module Beaker
       end
 
       it 'untars the file given' do
-        @platform = 'sles'
-        expect(instance).to receive(:execute).with(
-          /^tar .* #{tar_file} .* #{base_dir}$/,
-        )
-        instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-      end
-
-      it 'untars the file given' do
-        @platform = 'opensuse'
         expect(instance).to receive(:execute).with(
           /^tar .* #{tar_file} .* #{base_dir}$/,
         )
