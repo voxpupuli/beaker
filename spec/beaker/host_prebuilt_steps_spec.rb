@@ -58,18 +58,6 @@ describe Beaker do
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
-  # Solaris
-  it_behaves_like 'enables_root_login', 'solaris-10-64', [
-    "sudo -E svcadm restart network/ssh",
-    "sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
-  ], true
-
-  it_behaves_like 'enables_root_login', 'solaris-11-64', [
-    "sudo -E svcadm restart network/ssh",
-    "sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
-    "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi",
-  ], true
-
   it_behaves_like 'enables_root_login', 'amazon-2023-64', [
     "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
     "sudo -E systemctl restart sshd.service",
@@ -253,15 +241,7 @@ describe Beaker do
   context "sync_root_keys" do
     subject { dummy_class.new }
 
-    it "can sync keys on a solaris host" do
-      host = make_host('host', { 'platform' => 'solaris-11-64' })
-
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").once
-
-      subject.sync_root_keys(host, options)
-    end
-
-    it "can sync keys on a non-solaris host" do
+    it "can sync keys" do
       host = make_host('host', { 'platform' => 'el-9-64' })
 
       expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").once
@@ -499,10 +479,6 @@ describe Beaker do
 
     it "sets user ssh environment on an sles host" do
       test_host_ssh_calls('sles-15-64')
-    end
-
-    it "sets user ssh environment on a solaris host" do
-      test_host_ssh_calls('solaris-11-64')
     end
 
     it "sets user ssh environment on an aix host" do

@@ -27,14 +27,7 @@ hosts.each do |host|
   next if host['platform'].include?('windows')
 
   package = 'zsh'
-  package = 'CSWzsh' if host['platform'].include?('solaris-10')
   package = 'git' if /opensuse|sles/.match?(host['platform'])
-
-  if host['platform'].include?('solaris-11')
-    logger.debug("#{package} should be uninstalled on #{host}")
-    host.uninstall_package(package)
-    assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")
-  end
 
   assert_equal(false, host.check_for_package(package), "'#{package}' not should be installed")
   logger.debug("#{package} should be installed on #{host}")

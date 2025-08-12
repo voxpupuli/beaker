@@ -35,14 +35,7 @@ module Unix
     end
 
     def external_copy_base
-      @external_copy_base ||= begin
-        if self['platform'].variant == 'solaris' && self['platform'].version == '10'
-          # Solaris 10 uses / as the root user directory. Solaris 11 uses /root (like most).
-          '/'
-        else
-          '/root'
-        end
-      end
+      '/root'
     end
 
     # Tells you whether a host platform supports beaker's

@@ -314,8 +314,8 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'doesn\'t corrupt the global hosts hash when confining from a subset of hosts' do
-      host1 = { 'platform' => 'solaris', :roles => ['master'] }
-      host2 = { 'platform' => 'solaris', :roles => ['agent'] }
+      host1 = { 'platform' => 'el-9-64', :roles => ['master'] }
+      host2 = { 'platform' => 'el-10-64', :roles => ['agent'] }
       host3 = { 'platform' => 'windows', :roles => ['agent'] }
       hosts = [host1, host2, host3]
       agents = [host2, host3]
@@ -327,8 +327,8 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'can apply multiple confines correctly' do
-      host1 = { 'platform' => 'solaris', :roles => ['master'] }
-      host2 = { 'platform' => 'solaris', :roles => ['agent'] }
+      host1 = { 'platform' => 'el-9-64', :roles => ['master'] }
+      host2 = { 'platform' => 'el-10-64', :roles => ['agent'] }
       host3 = { 'platform' => 'windows', :roles => ['agent'] }
       host4 = { 'platform' => 'fedora', :roles => ['agent'] }
       host5 = { 'platform' => 'fedora', :roles => ['agent'] }
@@ -345,7 +345,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'can apply confine with multiple arguments' do
-      host1 = { 'platform' => 'solaris', 'hypervisor' => 'vmpooler' }
+      host1 = { 'platform' => 'el-9-64', 'hypervisor' => 'vmpooler' }
       host2 = { 'platform' => 'windows', 'hypervisor' => 'vmpooler' }
       host3 = { 'platform' => 'fedora', 'hypervisor' => 'vmpooler' }
       host4 = { 'platform' => 'fedora', 'hypervisor' => 'docker' }

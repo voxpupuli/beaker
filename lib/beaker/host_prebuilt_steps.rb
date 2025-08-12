@@ -11,7 +11,6 @@ module Beaker
     SLEEPWAIT = 5
     TRIES = 5
     ETC_HOSTS_PATH = "/etc/hosts"
-    ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
     ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
@@ -136,9 +135,7 @@ module Beaker
       block_on host do |host|
         logger.notify "Sync root authorized_keys from github on #{host.name}"
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-        if host['platform'].include?('solaris')
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
-        elsif host['platform'].include?('aix')
+        if host['platform'].include?('aix')
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
         else
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=\"/usr/gnu/bin:$PATH\" bash"), :accept_all_exit_codes => true)
@@ -247,10 +244,8 @@ module Beaker
           host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)"))
         elsif host['platform'].include?('osx')
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), { :pty => true })
-        elsif /(free|open)bsd/.match?(host['platform']) || host['platform'].include?('solaris-11')
+        elsif /(free|open)bsd/.match?(host['platform'])
           host.exec(Command.new('sudo cp -r .ssh /root/.'), { :pty => true })
-        elsif host['platform'].include?('solaris-10')
-          host.exec(Command.new('sudo cp -r .ssh /.'), { :pty => true })
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), { :pty => true })
         end
@@ -313,11 +308,6 @@ module Beaker
           host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), { :pty => true })
         elsif host['platform'].include?('openbsd')
           host.exec(Command.new("sudo perl -pi -e 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config"), { :pty => true })
-        elsif host['platform'].include?('solaris-10')
-          host.exec(Command.new("sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), { :pty => true })
-        elsif host['platform'].include?('solaris-11')
-          host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), { :pty => true })
-          host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), { :pty => true })
         elsif host.is_powershell?
           logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         elsif host.is_cygwin?
@@ -334,8 +324,6 @@ module Beaker
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), { :pty => true })
         elsif /(free|open)bsd/.match?(host['platform'])
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
-        elsif host['platform'].include?('solaris')
-          host.exec(Command.new("sudo -E svcadm restart network/ssh"), { :pty => true })
         else
           logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
         end
@@ -374,9 +362,6 @@ module Beaker
           host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
         when /amazon/, /^el-/, /centos/, /fedora/, /redhat/
           host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
-        when /solaris-11/
-          host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
-          host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % opts[:package_proxy]))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
         end

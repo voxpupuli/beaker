@@ -12,7 +12,7 @@ module Beaker
 
     # Hypervisor creator method.  Creates the appropriate hypervisor class object based upon
     # the provided hypervisor type selected, then provisions hosts with hypervisor.
-    # @param [String] type The type of hypervisor to create - one of aix, solaris, vsphere, fusion,
+    # @param [String] type The type of hypervisor to create - one of aix, vsphere, fusion,
     #                     blimpy, vcloud or vagrant
     # @param [Array<Host>] hosts_to_provision The hosts to be provisioned with the selected hypervisor
     # @param [Hash] options options Options to alter execution

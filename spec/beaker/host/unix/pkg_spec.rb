@@ -92,22 +92,6 @@ module Beaker
         expect(instance.check_for_package(pkg)).to be === true
       end
 
-      it "checks correctly on solaris-11" do
-        @opts = { 'platform' => 'solaris-11-is-me' }
-        pkg = 'solaris-11_package'
-        expect(Beaker::Command).to receive(:new).with("pkg info #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-        expect(instance).to receive(:exec).with('', { :accept_all_exit_codes => true }).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.check_for_package(pkg)).to be === true
-      end
-
-      it "checks correctly on solaris-10" do
-        @opts = { 'platform' => 'solaris-10-is-me' }
-        pkg = 'solaris-10_package'
-        expect(Beaker::Command).to receive(:new).with("pkginfo #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-        expect(instance).to receive(:exec).with('', { :accept_all_exit_codes => true }).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.check_for_package(pkg)).to be === true
-      end
-
       it "checks correctly on archlinux" do
         @opts = { 'platform' => 'archlinux-is-me' }
         pkg = 'archlinux_package'
@@ -314,13 +298,6 @@ module Beaker
         end
       end
 
-      it 'Solaris: calls solaris-specific install method' do
-        package_file = 'testing_345.yay'
-        @platform = 'solaris'
-        expect(instance).to receive(:solaris_install_local_package).with(package_file, anything)
-        instance.install_local_package(package_file)
-      end
-
       it 'OSX: calls host.install_package' do
         package_file = 'testing_678.yay'
         @platform = 'osx'
@@ -334,7 +311,6 @@ module Beaker
       let(:version) { @version || 6 }
       let(:tar_file) { 'test.tar.gz'         }
       let(:base_dir) { '/base/dir/fake'      }
-      let(:download_file) { 'download_file.txt' }
 
       before do
         allow(instance).to receive(:[]).with('platform') { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
@@ -344,35 +320,7 @@ module Beaker
         expect(instance).to receive(:execute).with(
           /^tar .* #{tar_file} .* #{base_dir}$/,
         )
-        instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-      end
-
-      context 'on solaris' do
-        before do
-          @platform = 'solaris'
-        end
-
-        it 'rejects unsupported versions' do
-          @version = '12'
-          expect do
-            instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-          end.to raise_error(
-            /^Solaris #{version} .* not supported .* uncompress_local_tarball$/,
-          )
-        end
-
-        it 'v10: gunzips before untaring' do
-          @version = '10'
-          expect(instance).to receive(:execute).with(/^gunzip #{tar_file}$/)
-          expect(instance).to receive(:execute).with(/^tar .* #{download_file}$/)
-          instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-        end
-
-        it 'v11: untars only' do
-          @version = '11'
-          expect(instance).to receive(:execute).with(/^tar .* #{tar_file}$/)
-          instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-        end
+        instance.uncompress_local_tarball(tar_file, base_dir)
       end
     end
   end

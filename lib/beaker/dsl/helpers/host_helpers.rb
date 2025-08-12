@@ -583,7 +583,7 @@ module Beaker
         def run_cron_on(host, action, user, entry = "", &block)
           block_on host do |host|
             platform = host['platform']
-            if platform.include?('solaris') || platform.include?('aix') then
+            if platform.include?('aix') then
               case action
               when :list   then args = '-l'
               when :remove then args = '-r'

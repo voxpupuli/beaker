@@ -12,11 +12,6 @@ module TestFileHelpers
                     :aix_hypervisor_server => "aix_hypervisor.labs.net",
                     :aix_hypervisor_username => "aixer",
                     :aix_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-acceptance",
-                    :solaris_hypervisor_server => "solaris_hypervisor.labs.net",
-                    :solaris_hypervisor_username => "harness",
-                    :solaris_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-old.private",
-                    :solaris_hypervisor_vmpath => "rpoooool/zs",
-                    :solaris_hypervisor_snappaths => ["rpoooool/USER/z0"],
                     :vsphere_server => "vsphere.labs.net",
                     :vsphere_username => "vsphere@labs.com",
                     :vsphere_password => "supersekritpassword", } }

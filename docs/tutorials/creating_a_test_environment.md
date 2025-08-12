@@ -52,7 +52,7 @@ To properly define a host you must provide:
 Additionally, Beaker supports the following host options:
 
 * ip: The IP address of the SUT.
-* hypervisor: One of `docker`, `solaris`, `ec2`, `vsphere`, `fusion`, `aix`, `vcloud` or `vagrant`.
+* hypervisor: One of `docker`, `ec2`, `vsphere`, `fusion`, `aix`, `vcloud` or `vagrant`.
   * Additional settings may be required depending on the selected hypervisor (ie, template, box, box_url, etc).  Check the documentation below for your hypervisor for details.
 * snapshot: The name of the snapshot to revert to before testing.
 * roles: In a single-host setup roles are optional. Roles describe the 'job' of a host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string.
@@ -74,7 +74,6 @@ The platform's format is `/^OSFAMILY-VERSION-ARCH.*$/` where `OSFAMILY` is one o
 * opensuse
 * ubuntu
 * windows
-* solaris
 * aix
 * el (covers centos, redhat and enterprise linux)
 
