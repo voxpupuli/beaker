@@ -109,10 +109,8 @@ module Beaker
         it 'does not make any configure calls' do
           options[:configure]         = false
           options[:timesync]          = true
-          options[:root_keys]         = true
           options[:host_name_prefix]  = "test-"
           expect(hypervisor).not_to receive(:timesync)
-          expect(hypervisor).not_to receive(:sync_root_keys)
           expect(hypervisor).not_to receive(:set_env)
           expect(hypervisor).not_to receive(:host_name_prefix)
           hypervisor.configure
