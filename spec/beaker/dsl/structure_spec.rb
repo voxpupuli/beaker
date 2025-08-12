@@ -293,25 +293,23 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'rejects hosts when a passed block returns true' do
-      host1 = { 'platform' => 'solaris' }
-      host2 = { 'platform' => 'solaris' }
+      host1 = { 'platform' => 'el-9-64' }
+      host2 = { 'platform' => 'el-10-64' }
       host3 = { 'platform' => 'windows' }
-      ret1 = (Struct.new('Result1', :stdout)).new(':global')
-      ret2 = (Struct.new('Result2', :stdout)).new('a_zone')
       hosts = [host1, host2, host3]
 
       expect(subject).to receive(:hosts).and_return(hosts).twice
       expect(subject).to receive(:on)
-        .with(host1, '/sbin/zonename')
-        .and_return(ret1)
+        .with(host1, 'firewall-cmd --state')
+        .and_return(double('Beaker::Result', stdout: 'running'))
       expect(subject).to receive(:on)
-        .with(host1, '/sbin/zonename')
-        .and_return(ret2)
+        .with(host2, 'firewall-cmd --state')
+        .and_return(double('Beaker::Result', stdout: 'stopped'))
 
       expect(subject).to receive(:hosts=).with([host1])
 
-      subject.confine :to, :platform => 'solaris' do |host|
-        subject.on(host, '/sbin/zonename').stdout.include?(':global')
+      subject.confine :to, :platform => 'el' do |host|
+        subject.on(host, 'firewall-cmd --state').stdout == 'running'
       end
     end
 
@@ -380,21 +378,17 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'selects hosts when a passed block returns true' do
-      host1 = { 'platform' => 'solaris1' }
-      host2 = { 'platform' => 'solaris2' }
+      host1 = { 'platform' => 'el-9-64' }
+      host2 = { 'platform' => 'el-10-64' }
       host3 = { 'platform' => 'windows' }
-      ret1 = double('result1')
-      allow(ret1).to receive(:stdout).and_return(':global')
-      ret2 = double('result2')
-      allow(ret2).to receive(:stdout).and_return('a_zone')
       hosts = [host1, host2, host3]
       expect(subject).to receive(:hosts).and_return(hosts)
 
-      expect(subject).to receive(:on).with(host1, '/sbin/zonename').once.and_return(ret1)
-      expect(subject).to receive(:on).with(host2, '/sbin/zonename').once.and_return(ret2)
+      expect(subject).to receive(:on).with(host1, 'firewall-cmd --state').once.and_return(double('Beaker::Result', stdout: 'running'))
+      expect(subject).to receive(:on).with(host2, 'firewall-cmd --state').once.and_return(double('Beaker::Result', stdout: 'stopped'))
 
-      selected_hosts = subject.select_hosts 'platform' => 'solaris' do |host|
-        subject.on(host, '/sbin/zonename').stdout.include?(':global')
+      selected_hosts = subject.select_hosts 'platform' => 'el' do |host|
+        subject.on(host, 'firewall-cmd --state').stdout == 'running'
       end
       expect(selected_hosts).to eq [host1]
     end

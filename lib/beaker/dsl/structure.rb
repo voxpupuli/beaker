@@ -239,9 +239,9 @@ module Beaker
       # @example Confining to anything but Windows and Solaris
       #     confine :except, :platform => ['windows', 'solaris']
       #
-      # @example Using additional block to confine to Solaris global zone.
-      #     confine :to, :platform => 'solaris' do |solaris|
-      #       on( solaris, 'zonename' ) =~ /global/
+      # @example Using additional block to confine to EL with firewalld
+      #     confine :to, :platform => 'el' do |host|
+      #       on(host, 'firewall-cmd --state').stdout == 'running'
       #     end
       #
       # @example Confining to an already defined subset of hosts
