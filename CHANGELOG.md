@@ -1,5 +1,14 @@
 # Changelog
 
+## [7.0.1](https://github.com/voxpupuli/beaker/tree/7.0.1) (2025-08-14)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.0.0...7.0.1)
+
+**Fixed bugs:**
+
+- Update verify\_host\_key usage to :never, fixes deprecation warning [\#1945](https://github.com/voxpupuli/beaker/pull/1945) ([silug](https://github.com/silug))
+- Merge ssh settings [\#1944](https://github.com/voxpupuli/beaker/pull/1944) ([silug](https://github.com/silug))
+
 ## [7.0.0](https://github.com/voxpupuli/beaker/tree/7.0.0) (2025-08-07)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/6.8.1...7.0.0)
