@@ -26,7 +26,7 @@ The log will then read as:
 _snip_
 ```
 pe-centos6 20:19:16$ echo hello!
-Attempting ssh connection to pe-centos6, user: anode, opts: {:config=>false, :verify_host_key=>false, :timeout=>300, :auth_methods=>["password"], :port=>22, :forward_agent=>true, :keys=>["/Users/anode/.ssh/id_rsa"], :user_known_hosts_file=>"/Users/anode/.ssh/known_hosts", :password=>"anode", :user=>"anode"}
+Attempting ssh connection to pe-centos6, user: anode, opts: {:config=>false, :verify_host_key=>:never, :timeout=>300, :auth_methods=>["password"], :port=>22, :forward_agent=>true, :keys=>["/Users/anode/.ssh/id_rsa"], :user_known_hosts_file=>"/Users/anode/.ssh/known_hosts", :password=>"anode", :user=>"anode"}
 ```
 _/snip_
 
