@@ -253,11 +253,6 @@ module Beaker
       self['ip'] = get_public_ip || get_ip
     end
 
-    # @return [Boolean] true if x86_64, false otherwise
-    def is_x86_64?
-      @x86_64 ||= determine_if_x86_64
-    end
-
     def connection
       # create new connection object if necessary
       if self['hypervisor'] == 'none' && @name == 'localhost'
