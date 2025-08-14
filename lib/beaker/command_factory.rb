@@ -3,6 +3,7 @@ require 'minitest/test'
 module Beaker
   module CommandFactory
     include Minitest::Assertions
+
     # Why do we need this accessor?
     # https://github.com/seattlerb/minitest/blob/master/lib/minitest/assertions.rb#L8-L12
     # Protocol: Nearly everything here boils up to +assert+, which

@@ -22,7 +22,7 @@ Naming/FileName:
 Naming/MethodParameterName:
   MinNameLength: 1
 
-Naming/PredicateName:
+Naming/PredicatePrefix:
   Enabled: false
 
 RSpec/DescribeClass:
