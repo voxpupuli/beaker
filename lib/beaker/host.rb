@@ -141,7 +141,19 @@ module Beaker
 
     # Does this host have this key?  Either as defined in the host itself, or globally?
     def [] k
-      host_hash[k] || options[k]
+      if k == 'ssh' || k == :ssh
+        # Merge global and host-level ssh options, host-level wins
+        global_ssh = options[k] || {}
+        host_ssh = host_hash[k] || {}
+        # Use OptionsHash if available for deep merge
+        if defined?(Beaker::Options::OptionsHash)
+          Beaker::Options::OptionsHash.new.merge(global_ssh).merge(host_ssh)
+        else
+          global_ssh.merge(host_ssh)
+        end
+      else
+        host_hash[k] || options[k]
+      end
     end
 
     # Does this host have this key?  Either as defined in the host itself, or globally?
