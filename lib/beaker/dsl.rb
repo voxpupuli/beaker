@@ -21,7 +21,7 @@ module Beaker
   #
   # @example Writing a complete testcase to be ran by the builtin test runner.
   #     test_name 'Ensure My App Starts Correctly' do
-  #       confine :except, :platform => ['windows', 'solaris']
+  #       confine :except, :platform => ['windows']
   #
   #       teardown do
   #         on master, puppet('resource mything ensure=absent')

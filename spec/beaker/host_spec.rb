@@ -109,16 +109,16 @@ module Beaker
         result.exit_code = 0
         expect(Beaker::Command).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
         expect(host).to receive(:exec).and_return(result)
-        expect(Beaker::SedCommand).to receive(:new).with('el-9-64', 's/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
+        expect(Beaker::SedCommand).to receive(:new).with('s/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
         host.add_env_var('key', '/my/first/value')
       end
     end
 
     describe "#delete_env_var" do
       it "deletes env var" do
-        expect(Beaker::SedCommand).to receive(:new).with('el-9-64', '/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
-        expect(Beaker::SedCommand).to receive(:new).with("el-9-64", "s/key=\\(.*\\)[;:]\\/my\\/first\\/value/key=\\1/", "~/.ssh/environment")
-        expect(Beaker::SedCommand).to receive(:new).with("el-9-64", "s/key=\\/my\\/first\\/value[;:]/key=/", "~/.ssh/environment")
+        expect(Beaker::SedCommand).to receive(:new).with('/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
+        expect(Beaker::SedCommand).to receive(:new).with("s/key=\\(.*\\)[;:]\\/my\\/first\\/value/key=\\1/", "~/.ssh/environment")
+        expect(Beaker::SedCommand).to receive(:new).with("s/key=\\/my\\/first\\/value[;:]/key=/", "~/.ssh/environment")
         host.delete_env_var('key', '/my/first/value')
       end
     end

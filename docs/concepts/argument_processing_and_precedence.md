@@ -147,7 +147,7 @@ Usage: beaker [options...]
                                      (default: slow)
         --[no-]ntp                   Sync time on SUTs before testing
                                      (default: false)
-        --repo-proxy                 Proxy packaging repositories on ubuntu, debian and solaris-11
+        --repo-proxy                 Proxy packaging repositories on ubuntu and debian
                                      (default: false)
         --package-proxy URL          Set proxy url for package managers (yum and apt)
         --[no-]validate              Validate that SUTs are correctly provisioned before running tests

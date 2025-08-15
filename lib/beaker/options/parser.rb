@@ -316,9 +316,9 @@ module Beaker
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
       #  - --fail-mode is one of 'fast', 'stop' or nil
       #  - if using blimpy hypervisor an EC2 YAML file exists
-      #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
+      #  - if using the aix or vcloud hypervisors a .fog file exists
       #  - that one and only one master is defined per set of hosts
-      #  - that solaris/windows/aix hosts are agent only for PE tests OR
+      #  - that windows/aix hosts are agent only for PE tests OR
       #  - sets the default host based upon machine definitions
       #  - if an ssh user has been defined make it the host user
       #
@@ -364,7 +364,7 @@ module Beaker
 
         @validator.validate_master_count(master)
 
-        # check that windows boxes are only agents (solaris can be a master in foss cases)
+        # check that windows boxes are only agents
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
           test_host_roles(name, host) if host[:platform].include?('windows')
@@ -418,7 +418,7 @@ module Beaker
       def check_hypervisor_config(visor)
         @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}") if ['blimpy'].include?(visor)
 
-        return unless %w(aix solaris vcloud).include?(visor)
+        return unless %w(aix vcloud).include?(visor)
 
         @validator.check_yaml_file(@options[:dot_fog], "required by #{visor}")
       end

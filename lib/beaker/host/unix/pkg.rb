@@ -10,16 +10,7 @@ module Unix::Pkg
 
   def check_for_command(name)
     result = exec(Beaker::Command.new("which #{name}"), :accept_all_exit_codes => true)
-    case self['platform']
-    when /solaris-10/
-      # solaris 10 appears to have considered `which` to have run successfully,
-      # even if the command didn't exist, so it'll return a 0 exit code in
-      # either case. Instead we match for the phrase output when a match isn't
-      # found: "no #{name} in $PATH", reversing it to match our API
-      !(result.stdout.match(/^no\ #{name}\ in\ /))
-    else
-      result.exit_code == 0
-    end
+    result.exit_code == 0
   end
 
   def check_for_package(name, opts = {})
@@ -41,11 +32,6 @@ module Unix::Pkg
       result = execute("rpm -q #{name}", opts) { |result| result }
     when /ubuntu|debian/
       result = execute("dpkg -s #{name}", opts) { |result| result }
-    when /solaris-11/
-      result = execute("pkg info #{name}", opts) { |result| result }
-    when /solaris-10/
-      result = execute("pkginfo #{name}", opts) { |result| result }
-      result = execute("pkginfo CSW#{name}", opts) { |result| result } if result.exit_code == 1
     when /openbsd/
       result = execute("pkg_info #{name}", opts) { |result| result }
     when /archlinux/
@@ -97,24 +83,6 @@ module Unix::Pkg
       name = "#{name}=#{version}" if version
       update_apt_if_needed
       execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
-    when /solaris-11/
-      if opts[:acceptable_exit_codes]
-        opts[:acceptable_exit_codes] << 4
-      else
-        opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
-      end
-      execute("pkg #{cmdline_args} install #{name}", opts)
-    when /solaris-10/
-      if !check_for_command('pkgutil')
-        # https://www.opencsw.org/package/pkgutil/
-        noask_text = self.noask_file_text
-        noask_file = File.join(external_copy_base, 'noask')
-        create_remote_file(self, noask_file, noask_text)
-        execute("pkgadd -d http://get.opencsw.org/now -a #{noask_file} -n all", opts)
-        execute('/opt/csw/bin/pkgutil -U', opts)
-        execute('/opt/csw/bin/pkgutil -y -i pkgutil', opts)
-      end
-      execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
     when /openbsd/
       begin
         execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
@@ -176,10 +144,6 @@ module Unix::Pkg
       execute("yum -y #{cmdline_args} remove #{name}", opts)
     when /ubuntu|debian/
       execute("apt-get purge #{cmdline_args} -y #{name}", opts)
-    when /solaris-11/
-      execute("pkg #{cmdline_args} uninstall #{name}", opts)
-    when /solaris-10/
-      execute("pkgrm -n #{cmdline_args} #{name}", opts)
     when /aix/
       execute("rpm #{cmdline_args} -e #{name}", opts)
     when /archlinux/
@@ -205,15 +169,6 @@ module Unix::Pkg
     when /ubuntu|debian/
       update_apt_if_needed
       execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
-    when /solaris-11/
-      if opts[:acceptable_exit_codes]
-        opts[:acceptable_exit_codes] << 4
-      else
-        opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
-      end
-      execute("pkg #{cmdline_args} update #{name}", opts)
-    when /solaris-10/
-      execute("pkgutil -u -y #{cmdline_args} #{name}", opts)
     else
       raise "Package #{name} cannot be upgraded on #{self}"
     end
@@ -222,13 +177,8 @@ module Unix::Pkg
   # Examine the host system to determine the architecture
   # @return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
-    if self[:platform].include?('solaris')
-      result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
-      result.exit_code == 0
-    else
-      result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
-      result.exit_code == 0
-    end
+    result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
+    result.exit_code == 0
   end
 
   # Extract RPM command's proxy options from URL
@@ -253,11 +203,9 @@ module Unix::Pkg
   # Installs a package already located on a SUT
   #
   # @param [String] onhost_package_file Path to the package file to install
-  # @param [String] onhost_copy_dir Path to the directory where the package
-  #                                 file is located. Used on solaris only
   #
   # @return nil
-  def install_local_package(onhost_package_file, onhost_copy_dir = nil)
+  def install_local_package(onhost_package_file)
     variant, version, _arch, _codename = self['platform'].to_array
     case variant
     when /^(amazon(fips)?|fedora|el|redhat|centos)$/
@@ -270,8 +218,6 @@ module Unix::Pkg
       execute("dpkg -i --force-all #{onhost_package_file}")
       # -qq: Only output errors to stdout
       execute("apt-get update -qq")
-    when /^solaris$/
-      self.solaris_install_local_package(onhost_package_file, onhost_copy_dir)
     when /^osx$/
       install_package(onhost_package_file)
     else
@@ -285,65 +231,16 @@ module Unix::Pkg
   #
   # @param [String] onhost_tar_file Path to the tarball to uncompress
   # @param [String] onhost_base_dir Path to the directory to uncompress to
-  # @param [String] download_file Name of the file after uncompressing
   #
   # @return nil
-  def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
-    variant, version, _arch, _codename = self['platform'].to_array
-    case variant
+  def uncompress_local_tarball(onhost_tar_file, onhost_base_dir)
+    case self['platform'].variant
     when /^(amazon(fips)?|fedora|el|centos|redhat|opensuse|sles|debian|ubuntu)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
-    when /^solaris$/
-      # uncompress PE puppet-agent tarball
-      if version == '10'
-        execute("gunzip #{onhost_tar_file}")
-        tar_file_name = File.basename(download_file, '.gz')
-        execute("tar -xvf #{tar_file_name}")
-      elsif version == '11'
-        execute("tar -zxvf #{onhost_tar_file}")
-      else
-        msg = "Solaris #{version} is not supported by the method "
-        msg << 'uncompress_local_tarball'
-        raise ArgumentError, msg
-      end
     else
       msg = "Platform #{variant} is not supported by the method "
       msg << 'uncompress_local_tarball'
       raise ArgumentError, msg
     end
-  end
-
-  # Installs a local package file on a solaris host
-  #
-  # @param [String] package_path Path to the package file on the host
-  # @param [String] noask_directory Path to the directory for the noask file
-  #   (only needed for solaris 10).
-  #
-  # @return [Beaker::Result] Result of installation command execution
-  def solaris_install_local_package(package_path, noask_directory = nil)
-    variant, version, _arch, _codename = self['platform'].to_array
-
-    version = version.split('.')[0] # packages are only published for major versions
-
-    error_message = nil
-    unless variant == 'solaris'
-      error_message = "Can not call solaris_install_local_package for the "
-      error_message << "non-solaris platform '#{variant}'"
-    end
-    if version != '10' && version != '11'
-      error_message = "Solaris #{version} is not supported by the method "
-      error_message << 'solaris_install_local_package'
-    end
-    raise ArgumentError, error_message if error_message
-
-    if version == '10'
-      noask_text = self.noask_file_text
-      create_remote_file self, File.join(noask_directory, 'noask'), noask_text
-
-      install_cmd = "gunzip -c #{package_path} | pkgadd -d /dev/stdin -a noask -n all"
-    elsif version == '11'
-      install_cmd = "pkg install -g #{package_path} puppet-agent"
-    end
-    self.exec(Beaker::Command.new(install_cmd))
   end
 end

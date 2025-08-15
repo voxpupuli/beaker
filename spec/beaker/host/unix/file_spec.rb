@@ -142,30 +142,6 @@ module Beaker
       end
     end
 
-    describe '#noask_file_text' do
-      it 'errors on non-solaris platforms' do
-        @platform = 'debian-12-x86_64'
-        expect do
-          instance.noask_file_text
-        end.to raise_error(ArgumentError, /^noask\ file\ text\ unknown/)
-      end
-
-      it 'errors on solaris versions other than 10' do
-        @platform = 'solaris-11-x86_64'
-        expect do
-          instance.noask_file_text
-        end.to raise_error(ArgumentError, /^noask\ file\ text\ unknown/)
-      end
-
-      it 'returns the noask file correctly for solaris 10' do
-        @platform = 'solaris-10-x86_64'
-        text = instance.noask_file_text
-        expect(text).to match(/instance\=overwrite/)
-        expect(text).to match(/space\=quit/)
-        expect(text).to match(/basedir\=default/)
-      end
-    end
-
     describe '#chown' do
       let(:user) { 'someuser' }
       let(:path) { '/path/to/chown/on' }

@@ -80,7 +80,7 @@ module Beaker
       it "Does the Right Thing on non-Linux hosts" do
         hosts = [
           make_host("myHost", @options.merge('platform' => 'windows-11-64')),
-          make_host("myOtherHost", @options.merge('platform' => 'solaris-11-64')),
+          make_host("myOtherHost", @options.merge('platform' => 'osx-15-64')),
         ]
         @my_logger.remove_destination(STDOUT)
         perf = described_class.new(hosts, @options)

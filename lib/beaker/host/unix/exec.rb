@@ -135,7 +135,7 @@ module Unix::Exec
   end
 
   def get_ip
-    if self['platform'].include?('solaris') || self['platform'].include?('osx')
+    if self['platform'].include?('osx')
       execute("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1").strip
     else
 
@@ -220,7 +220,7 @@ module Unix::Exec
       return # nothing to do here, key value pair already exists
     # see if the key already exists
     elsif exec(Beaker::Command.new("grep ^#{key}= #{env_file}"), :accept_all_exit_codes => true).exit_code == 0
-      exec(Beaker::SedCommand.new(self['platform'], "s/^#{key}=/#{key}=#{escaped_val}:/", env_file))
+      exec(Beaker::SedCommand.new("s/^#{key}=/#{key}=#{escaped_val}:/", env_file))
     else
       exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
     end
@@ -240,11 +240,11 @@ module Unix::Exec
     env_file = self[:ssh_env_file]
     val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
     # if the key only has that single value remove the entire line
-    exec(Beaker::SedCommand.new(self['platform'], "/#{key}=#{val}$/d", env_file))
+    exec(Beaker::SedCommand.new("/#{key}=#{val}$/d", env_file))
     # value in middle of list
-    exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", env_file))
+    exec(Beaker::SedCommand.new("s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", env_file))
     # value in start of list
-    exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=#{val}[;:]/#{key}=/", env_file))
+    exec(Beaker::SedCommand.new("s/#{key}=#{val}[;:]/#{key}=/", env_file))
     # update the profile.d to current state
     # match it to the contents of ssh_env_file
     mirror_env_to_profile_d(env_file)
@@ -267,7 +267,7 @@ module Unix::Exec
     key = key.to_s
     env_file = self[:ssh_env_file]
     # remove entire line
-    exec(Beaker::SedCommand.new(self['platform'], "/^#{key}=.*$/d", env_file))
+    exec(Beaker::SedCommand.new("/^#{key}=.*$/d", env_file))
     # update the profile.d to current state
     # match it to the contents of ssh_env_file
     mirror_env_to_profile_d(env_file)
@@ -282,8 +282,6 @@ module Unix::Exec
       exec(Beaker::Command.new("systemctl restart ssh"))
     when /(el|centos|redhat|oracle|scientific)-[0-6]\b/
       exec(Beaker::Command.new("/sbin/service sshd restart"))
-    when /solaris/
-      exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo /etc/rc.d/sshd restart"))
     when /opensuse|sles/
@@ -300,7 +298,7 @@ module Unix::Exec
   #   (from {#ssh_service_restart}).
   def ssh_permit_user_environment
     case self['platform']
-    when /amazon|debian|ubuntu|archlinux|el-|centos|fedora|redhat|oracle|scientific|opensuse|sles|solaris/
+    when /amazon|debian|ubuntu|archlinux|el-|centos|fedora|redhat|oracle|scientific|opensuse|sles/
       directory = tmpdir
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
@@ -397,8 +395,6 @@ module Unix::Exec
       arch = self['platform'].arch
       arch = 'amd64' if %w[x64 x86_64].include?(arch)
       add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{self['platform'].version}/packages/#{arch}/")
-    elsif self['platform'].include?('solaris-10')
-      add_env_var('PATH', '/opt/csw/bin')
     end
 
     # add the env var set to this test host
