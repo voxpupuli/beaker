@@ -44,7 +44,6 @@ module Beaker
           provision
           preserve-hosts
           preserve-state
-          root-keys
           keyfile
           timeout
           install

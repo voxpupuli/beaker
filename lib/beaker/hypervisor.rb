@@ -89,7 +89,6 @@ module Beaker
         block_on @hosts, { :run_in_parallel => run_in_parallel } do |host|
           timesync(host, @options) if host[:timesync]
         end
-        sync_root_keys(@hosts, @options) if @options[:root_keys]
         set_env(@hosts, @options) if @options[:set_env]
         disable_updates(@hosts, @options) if @options[:disable_updates]
       rescue SignalException => e

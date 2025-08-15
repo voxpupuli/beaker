@@ -5,7 +5,6 @@ describe Beaker do
   let(:ntpserver_set)  { "ntp_server_set" }
   let(:options_ntp)    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let(:ntpserver)      { Beaker::HostPrebuiltSteps::NTPSERVER }
-  let(:sync_cmd)       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
   let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
@@ -247,26 +246,6 @@ describe Beaker do
       expect(host).to receive(:do_scp_to).with(tempfilepath, filepath, subject.instance_variable_get(:@options)).once
 
       subject.copy_file_to_remote(host, filepath, content)
-    end
-  end
-
-  context "sync_root_keys" do
-    subject { dummy_class.new }
-
-    it "can sync keys on a solaris host" do
-      host = make_host('host', { 'platform' => 'solaris-11-64' })
-
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").once
-
-      subject.sync_root_keys(host, options)
-    end
-
-    it "can sync keys on a non-solaris host" do
-      host = make_host('host', { 'platform' => 'el-9-64' })
-
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").once
-
-      subject.sync_root_keys(host, options)
     end
   end
 

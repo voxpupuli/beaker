@@ -114,8 +114,6 @@ Usage: beaker [options...]
                                      onpass (keep SUTs alive if no failures occur during testing)
                                      never (cleanup SUTs - shutdown and destroy any changes made during testing)
                                      (default: never)
-        --root-keys                  Install puppetlabs pubkeys for superuser
-                                     (default: false)
         --keyfile /PATH/TO/SSH/KEY   Specify alternate SSH key
                                      (default: ~/.ssh/id_rsa)
         --timeout TIMEOUT            (vCloud only) Specify a provisioning timeout (in seconds)
@@ -213,7 +211,6 @@ Values already included in Beaker as defaults for required arguments.
           :type                   => 'pe',
           :provision              => true,
           :preserve_hosts         => 'never',
-          :root_keys              => false,
           :quiet                  => false,
           :project_root           => File.expand_path(File.join(__dir__, "../")),
           :xml_dir                => 'junit',
