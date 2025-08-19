@@ -66,11 +66,4 @@ module Mac::Pkg
   def upgrade_package(name, _cmdline_args = '')
     raise "Package #{name} cannot be upgraded on #{self}"
   end
-
-  # Examine the host system to determine the architecture
-  # @return [Boolean] true if x86_64, false otherwise
-  def determine_if_x86_64
-    result = exec(Beaker::Command.new("uname -a | grep x86_64"), :expect_all_exit_codes => true)
-    result.exit_code == 0
-  end
 end
