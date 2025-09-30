@@ -3,7 +3,7 @@ module PSWindows::File
 
   def tmpfile(name = '', extension = nil)
     tmp_path = exec(powershell('[System.IO.Path]::GetTempPath()')).stdout.chomp
-    
+
     if name.empty?
       base_name = exec(powershell('[System.IO.Path]::GetRandomFileName()')).stdout.chomp
     else
@@ -18,7 +18,7 @@ module PSWindows::File
       final_name = base_name
     end
     file_path = File.join(tmp_path, final_name)
-    
+
     exec(powershell("New-Item -Path '#{file_path}' -ItemType 'file' -Force"))
     file_path
   end
