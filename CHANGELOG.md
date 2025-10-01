@@ -1,6 +1,18 @@
 # Changelog
 
-## [7.0.1](https://github.com/voxpupuli/beaker/tree/7.0.1) (2025-08-14)
+## [7.1.0](https://github.com/voxpupuli/beaker/tree/7.1.0) (2025-10-01)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.0.1...7.1.0)
+
+**Implemented enhancements:**
+
+- \(\#1955\) Implement the powershell tmpfile method with extensions [\#1956](https://github.com/voxpupuli/beaker/pull/1956) ([michael-riddle](https://github.com/michael-riddle))
+
+**Closed issues:**
+
+- The tmpfile method in pswindows needs to implement the use of the extension parameter [\#1955](https://github.com/voxpupuli/beaker/issues/1955)
+
+## [7.0.1](https://github.com/voxpupuli/beaker/tree/7.0.1) (2025-08-15)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/7.0.0...7.0.1)
 
