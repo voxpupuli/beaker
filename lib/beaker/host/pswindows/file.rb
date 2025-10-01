@@ -1,15 +1,26 @@
 module PSWindows::File
   include Beaker::CommandFactory
 
-  def tmpfile(_name = '', extension = nil)
-    if extension
-      # TODO: I do not have access to Windows, but the internet suggests this
-      # $newname = [System.IO.Path]::ChangeExtension($filename, "#{extension}") ; MoveItem $filename $newname
-      raise NotImplementedError, 'Passing an extension is not implemented'
+  def tmpfile(name = '', extension = nil)
+    tmp_path = exec(powershell('[System.IO.Path]::GetTempPath()')).stdout.chomp
+
+    if name.empty?
+      base_name = exec(powershell('[System.IO.Path]::GetRandomFileName()')).stdout.chomp
+    else
+      base_name = name
     end
 
-    result = exec(powershell('[System.IO.Path]::GetTempFileName()'))
-    result.stdout.chomp
+    if extension
+      # Remove existing extension if present and add the new one
+      base_name = base_name.sub(/\.[^.]+$/, '')
+      final_name = "#{base_name}.#{extension}"
+    else
+      final_name = base_name
+    end
+    file_path = File.join(tmp_path, final_name)
+
+    exec(powershell("New-Item -Path '#{file_path}' -ItemType 'file' -Force"))
+    file_path
   end
 
   def tmpdir(name = '')
