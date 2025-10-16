@@ -35,6 +35,19 @@ module PSWindows::Pkg
   # @api private
   def identify_windows_architecture
     arch = nil
+    execute('echo %PROCESSOR_ARCHITECTURE%', :accept_all_exit_codes => true) do |result|
+      arch = if result.exit_code == 0
+               result.stdout.include?('64') ? '64' : '32'
+             else
+               identify_windows_architecture_wmic
+             end
+    end
+    arch
+  end
+
+  # @api private
+  def identify_windows_architecture_wmic
+    arch = nil
     execute("wmic os get osarchitecture", :accept_all_exit_codes => true) do |result|
       arch = if result.exit_code == 0
                result.stdout.include?('64') ? '64' : '32'
