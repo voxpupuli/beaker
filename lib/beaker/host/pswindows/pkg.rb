@@ -27,7 +27,7 @@ module PSWindows::Pkg
   # Examine the host system to determine the architecture, overrides default host determine_if_x86_64 so that wmic is used
   # @return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
-    identify_windows_architecture.include?('64')
+    identify_windows_architecture.include?('AMD64')
   end
 
   private
@@ -35,21 +35,8 @@ module PSWindows::Pkg
   # @api private
   def identify_windows_architecture
     arch = nil
-    execute("wmic os get osarchitecture", :accept_all_exit_codes => true) do |result|
-      arch = if result.exit_code == 0
-               result.stdout.include?('64') ? '64' : '32'
-             else
-               identify_windows_architecture_from_os_name_for_win2003
-             end
-    end
-    arch
-  end
-
-  # @api private
-  def identify_windows_architecture_from_os_name_for_win2003
-    arch = nil
-    execute("wmic os get name", :accept_all_exit_codes => true) do |result|
-      arch = result.stdout.include?('64') ? '64' : '32'
+    execute('echo %PROCESSOR_ARCHITECTURE%', :accept_all_exit_codes => true) do |result|
+      arch = result.stdout.strip if result.exit_code == 0
     end
     arch
   end
