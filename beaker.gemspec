@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   # Run time dependencies
   # Required for Ruby 3.3+ support
   s.add_dependency 'base64', '>= 0.2.0', '< 1'
-  s.add_dependency 'benchmark', '>= 0.3', '< 0.5'
+  s.add_dependency 'benchmark', '>= 0.3', '< 0.6'
   # we cannot require 1.0.2 because that requires Ruby 3.1
   s.add_dependency 'minitar', '>= 0.12', '< 2'
   s.add_dependency 'minitest', '~> 5.4'
