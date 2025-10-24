@@ -5,7 +5,7 @@ require 'beaker/version'
 Gem::Specification.new do |s|
   s.name        = "beaker"
   s.version     = Beaker::Version::STRING
-  s.authors     = ["Puppet"]
+  s.authors     = ["Puppet", "Vox Pupuli"]
   s.email       = ["voxpupuli@groups.io"]
   s.homepage    = "https://github.com/voxpupuli/beaker"
   s.summary     = %q{Let's test Puppet!}
