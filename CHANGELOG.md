@@ -1,5 +1,14 @@
 # Changelog
 
+## [7.2.0](https://github.com/voxpupuli/beaker/tree/7.2.0) (2025-10-24)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.1.0...7.2.0)
+
+**Implemented enhancements:**
+
+- benchmark: Allow 0.5 [\#1960](https://github.com/voxpupuli/beaker/pull/1960) ([bastelfreak](https://github.com/bastelfreak))
+- Remove default use of wmic to determine arch [\#1958](https://github.com/voxpupuli/beaker/pull/1958) ([silug](https://github.com/silug))
+
 ## [7.1.0](https://github.com/voxpupuli/beaker/tree/7.1.0) (2025-10-01)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/7.0.1...7.1.0)
