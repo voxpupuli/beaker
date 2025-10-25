@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.2.1](https://github.com/voxpupuli/beaker/tree/7.2.1) (2025-10-24)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.2.0...7.2.1)
+
+**Fixed bugs:**
+
+- gemspec: Add Vox Pupuli as author [\#1963](https://github.com/voxpupuli/beaker/pull/1963) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [7.2.0](https://github.com/voxpupuli/beaker/tree/7.2.0) (2025-10-24)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/7.1.0...7.2.0)
