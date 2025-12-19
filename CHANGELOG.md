@@ -1,6 +1,16 @@
 # Changelog
 
-## [7.2.1](https://github.com/voxpupuli/beaker/tree/7.2.1) (2025-10-24)
+All notable changes to this project will be documented in this file.
+
+## [7.2.2](https://github.com/voxpupuli/beaker/tree/7.2.2) (2025-12-19)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.2.1...7.2.2)
+
+**Merged pull requests:**
+
+- allow minitest 6.x [\#1974](https://github.com/voxpupuli/beaker/pull/1974) ([rwaffen](https://github.com/rwaffen))
+
+## [7.2.1](https://github.com/voxpupuli/beaker/tree/7.2.1) (2025-10-25)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/7.2.0...7.2.1)
 

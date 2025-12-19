@@ -184,16 +184,14 @@ namespace :test do
 end
 
 begin
-  require 'rubygems'
   require 'github_changelog_generator/task'
 
   GitHubChangelogGenerator::RakeTask.new :changelog do |config|
-    config.exclude_labels = %w{duplicate question invalid wontfix wont-fix skip-changelog github_actions}
+    config.header = "# Changelog\n\nAll notable changes to this project will be documented in this file."
+    config.exclude_labels = %w[duplicate question invalid wontfix wont-fix skip-changelog github_actions]
     config.user = 'voxpupuli'
     config.project = 'beaker'
-    gem_version = Gem::Specification.load("#{config.project}.gemspec").version
-    config.future_release = gem_version
-    config.release_branch = 'master'
+    config.future_release = Gem::Specification.load("#{config.project}.gemspec").version
     config.exclude_tags_regex = /\A4\./
     config.since_tag = '5.7.0'
   end
