@@ -137,7 +137,7 @@ skip_test 'requires puppet and mcollective service scripts from AIO agent packag
 ```
 **Bad:**
 ```ruby
-confine :to, :platform => 'solaris:pending'
+confine :to, :platform => 'windows:pending'
 ```
 
 ## Confining

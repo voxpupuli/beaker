@@ -236,12 +236,12 @@ module Beaker
       # @example Basic usage to confine to debian OSes.
       #     confine :to, :platform => 'debian'
       #
-      # @example Confining to anything but Windows and Solaris
-      #     confine :except, :platform => ['windows', 'solaris']
+      # @example Confining to anything but Windows
+      #     confine :except, :platform => ['windows']
       #
-      # @example Using additional block to confine to Solaris global zone.
-      #     confine :to, :platform => 'solaris' do |solaris|
-      #       on( solaris, 'zonename' ) =~ /global/
+      # @example Using additional block to confine to EL with firewalld
+      #     confine :to, :platform => 'el' do |host|
+      #       on(host, 'firewall-cmd --state').stdout == 'running'
       #     end
       #
       # @example Confining to an already defined subset of hosts

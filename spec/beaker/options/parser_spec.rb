@@ -713,7 +713,7 @@ module Beaker
           expect { parser.check_hypervisor_config('blimpy') }.to raise_error(ArgumentError, /required by blimpy/)
         end
 
-        %w(aix solaris vcloud).each do |visor|
+        %w(aix vcloud).each do |visor|
           it "checks dot_fog when #{visor}" do
             options[:ec2_yaml] = invalid_file
             options[:dot_fog]  = hosts_path

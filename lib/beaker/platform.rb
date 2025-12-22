@@ -3,7 +3,7 @@ module Beaker
   # all String methods while adding several platform-specific use cases.
   class Platform < String
     # Supported platforms
-    PLATFORMS = /^(alpine|amazon(fips)?|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|redhatfips|scientific|opensuse|sles|ubuntu|windows|solaris|aix|archlinux|el)\-.+\-.+$/
+    PLATFORMS = /^(alpine|amazon(fips)?|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|redhatfips|scientific|opensuse|sles|ubuntu|windows|aix|archlinux|el)\-.+\-.+$/
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
       { :debian => { "forky" => "14",
@@ -53,7 +53,6 @@ module Beaker
     # * sles
     # * ubuntu
     # * windows
-    # * solaris
     # * aix
     # * el
     # * archlinux
@@ -124,8 +123,6 @@ module Beaker
         %w[curl lsb-release]
       when 'freebsd'
         %w[curl perl5|perl]
-      when 'solaris'
-        @version.to_i >= 11 ? %w[curl] : %w[CSWcurl wget]
       when 'archlinux'
         %w[curl net-tools openssh]
       when 'amazon', 'amazonfips', 'fedora'
@@ -150,8 +147,6 @@ module Beaker
         ['ntp']
       when 'sles'
         @version.to_i >= 11 ? %w[ntp] : []
-      when 'solaris'
-        @version.to_i >= 11 ? %w[ntp] : %w[CSWntp]
       else
         %w[ntpdate]
       end
