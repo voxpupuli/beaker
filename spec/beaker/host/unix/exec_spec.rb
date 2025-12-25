@@ -78,18 +78,14 @@ module Beaker
 
     describe '#ssh_permit_user_environment' do
       context 'When called without error' do
-        let(:directory) { '/directory' }
-        let(:ssh_command) { "echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit" }
-        let(:ssh_move) { "mv #{directory}/sshd_config.permit /etc/ssh/sshd_config" }
+        let(:ssh_command) { "sed -i -e 's/^PermitUserEnvironment .*/PermitUserEnvironment yes/' -e t -e '1s/^/PermitUserEnvironment yes\\n/' /etc/ssh/sshd_config" }
 
         platforms = PlatformHelpers::REDHATPLATFORMS + PlatformHelpers::DEBIANPLATFORMS
 
         platforms.each do |platform|
           it "calls the correct commands for #{platform}" do
             opts['platform'] = platform
-            expect(instance).to receive(:exec).twice
-            expect(instance).to receive(:tmpdir).and_return(directory)
-            expect(Beaker::Command).to receive(:new).with(ssh_move)
+            expect(instance).to receive(:exec).once
             expect(Beaker::Command).to receive(:new).with(ssh_command)
             expect(instance).to receive(:ssh_service_restart)
             expect { instance.ssh_permit_user_environment }.not_to raise_error
