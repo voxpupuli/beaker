@@ -20,12 +20,12 @@ jobs:
       - name: Install Ruby ${{ matrix.ruby }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
+          ruby-version: '4.0'
           bundler-cache: true
       - name: Run Rubocop
         run: bundle exec rake rubocop
       - id: ruby
-        uses: voxpupuli/ruby-version@v1
+        uses: voxpupuli/ruby-version@v2
 
   test:
     name: "Ruby ${{ matrix.ruby }}"
