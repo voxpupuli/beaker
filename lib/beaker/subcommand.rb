@@ -31,7 +31,6 @@ module Beaker
     class_option :provision, :type => :boolean, :group => 'Beaker run'
     class_option :'preserve-hosts', :type => :string, :group => 'Beaker run'
     class_option :'preserve-state', :type => :boolean, :group => 'Beaker run'
-    class_option :'root-keys', :type => :boolean, :group => 'Beaker run'
     class_option :keyfile, :type => :string, :group => 'Beaker run'
     class_option :timeout, :type => :string, :group => 'Beaker run'
     class_option :install, :aliases => '-i', :type => :string, :group => 'Beaker run'
