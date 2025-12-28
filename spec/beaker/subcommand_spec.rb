@@ -127,7 +127,7 @@ module Beaker
       let(:cleaned_hosts) { double }
       let(:yielded_host_hash) { double }
       let(:yielded_host_name) { double }
-      let(:network_manager) { double('network_manager') }
+      let(:network_manager) { double(Beaker::NetworkManager) }
       let(:hosts) { double('hosts') }
       let(:hypervisors) { double('hypervisors') }
       let(:options) { double('options') }
@@ -270,7 +270,7 @@ module Beaker
     context 'destroy' do
       let(:cli) { subcommand.cli }
       let(:mock_options) { { :timestamp => 'noon', :other_key => 'cordite' } }
-      let(:network_manager) { double('network_manager') }
+      let(:network_manager) { double(Beaker::NetworkManager) }
 
       it 'calls destroy and updates the yaml store' do
         allow(cli).to receive(:parse_options)
