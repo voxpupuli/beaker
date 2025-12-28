@@ -32,66 +32,66 @@ module Beaker
     end
 
     context 'ensure that beaker options can be passed through' do
-      let(:beaker_options_list) do
-        %w[
-          options-file
-          helper
-          load-path
-          tests
-          pre-suite
-          post-suite
-          pre-cleanup
-          provision
-          preserve-hosts
-          preserve-state
-          root-keys
-          keyfile
-          timeout
-          install
-          modules
-          quiet
-          color
-          color-host-output
-          log-level
-          log-prefix
-          dry-run
-          fail-mode
-          ntp
-          repo-proxy
-          package-proxy
-          validate
-          collect-perf-data
-          parse-only
-          tag
-          exclude-tags
-          xml-time-order
-          debug-errors
-          exec_manual_tests
-          test-tag-exclude
-          test-tag-and
-          test-tag-or
-          xml
-          type
-          debug
-        ]
-      end
+      beaker_options_list = %w[
+        options-file
+        helper
+        load-path
+        tests
+        pre-suite
+        post-suite
+        pre-cleanup
+        provision
+        preserve-hosts
+        preserve-state
+        root-keys
+        keyfile
+        timeout
+        install
+        modules
+        quiet
+        color
+        color-host-output
+        log-level
+        log-prefix
+        dry-run
+        fail-mode
+        ntp
+        repo-proxy
+        package-proxy
+        validate
+        collect-perf-data
+        parse-only
+        tag
+        exclude-tags
+        xml-time-order
+        debug-errors
+        exec_manual_tests
+        test-tag-exclude
+        test-tag-and
+        test-tag-or
+        xml
+        type
+        debug
+      ]
 
       let(:yaml_store_mock) { double('yaml_store_mock') }
 
-      it 'does not error with valid beaker options' do
+      describe 'does not error with valid beaker option' do
         beaker_options_list.each do |option|
-          allow_any_instance_of(Beaker::CLI).to receive(:parse_options)
-          allow_any_instance_of(Beaker::CLI).to receive(:configured_options).and_return({})
+          it option do
+            allow_any_instance_of(Beaker::CLI).to receive(:parse_options)
+            allow_any_instance_of(Beaker::CLI).to receive(:configured_options).and_return({})
 
-          allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
-          allow(yaml_store_mock).to receive(:transaction).and_yield
-          allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
-          allow(File).to receive(:open)
-          allow_any_instance_of(Beaker::Logger).to receive(:notify).twice
-          expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
-          expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
+            allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
+            allow(yaml_store_mock).to receive(:transaction).and_yield
+            allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
+            allow(File).to receive(:open)
+            allow_any_instance_of(Beaker::Logger).to receive(:notify).twice
+            expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
+            expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
 
-          expect { described_class.start(['init', '--hosts', 'centos', "--#{option}"]) }.not_to output(/ERROR/).to_stderr
+            expect { described_class.start(['init', '--hosts', 'centos', "--#{option}"]) }.not_to output(/ERROR/).to_stderr
+          end
         end
       end
 
