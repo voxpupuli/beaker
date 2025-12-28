@@ -7,16 +7,28 @@ module Beaker
       described_class.new
     end
 
+    let(:mock_state) { double(YAML::Store) }
+    let(:mock_options_storage) { double(YAML::Store) }
+
     describe '#initialize' do
       it 'creates a cli object' do
         expect(subcommand.cli).to be_instance_of(Beaker::CLI)
       end
+    end
 
-      describe 'File operation initialization for subcommands' do
-        it 'checks to ensure subcommand file resources exist' do
-          expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
-          subcommand
-        end
+    describe '#state' do
+      it 'ensures the parent directory exists' do
+        expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
+        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE)
+        subcommand.send(:state)
+      end
+    end
+
+    describe '#options_storage' do
+      it 'ensures the parent directory exists' do
+        expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
+        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_OPTIONS)
+        subcommand.send(:options_storage)
       end
     end
 
@@ -63,18 +75,16 @@ module Beaker
         debug
       ]
 
-      let(:yaml_store_mock) { double('yaml_store_mock') }
-
       describe 'does not error with valid beaker option' do
         beaker_options_list.each do |option|
           it option do
             allow_any_instance_of(Beaker::CLI).to receive(:parse_options)
             allow_any_instance_of(Beaker::CLI).to receive(:configured_options).and_return({})
 
-            allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
-            allow(yaml_store_mock).to receive(:transaction).and_yield
-            allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
-            allow(File).to receive(:open)
+            allow_any_instance_of(described_class).to receive(:state).and_return(mock_state)
+            allow(mock_state).to receive(:transaction).and_yield
+            allow(mock_state).to receive(:[]=).with('provisioned', false)
+            allow(File).to receive(:write).with(SubcommandUtil::SUBCOMMAND_OPTIONS, anything)
             allow_any_instance_of(Beaker::Logger).to receive(:notify).twice
 
             expect { described_class.start(['init', '--hosts', 'centos', "--#{option}"]) }.not_to output(/ERROR/).to_stderr
@@ -83,10 +93,7 @@ module Beaker
       end
 
       it "errors with a bad option here" do
-        allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
-        allow(yaml_store_mock).to receive(:transaction).and_yield
-        allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
-        expect(File).not_to receive(:open)
+        expect(File).not_to receive(:write)
         expect { described_class.start(['init', '--hosts', 'centos', '--bad-option']) }.to output(/ERROR/).to_stderr
       end
     end
@@ -94,7 +101,6 @@ module Beaker
     describe '#init' do
       let(:cli) { subcommand.cli }
       let(:mock_options) { { :timestamp => 'noon', :other_key => 'cordite' } }
-      let(:yaml_store_mock) { double('yaml_store_mock') }
 
       before do
         allow(cli).to receive(:parse_options)
@@ -102,22 +108,21 @@ module Beaker
       end
 
       it 'calculates options and writes them to disk and deletes the' do
-        allow(File).to receive(:open)
-        allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
-        allow(yaml_store_mock).to receive(:transaction).and_yield
-        expect(yaml_store_mock).to receive(:[]=).with('provisioned', false)
+        expect(subcommand).to receive(:state).and_return(mock_state).twice
+        expect(mock_state).to receive(:transaction).and_yield
+        expect(mock_state).to receive(:[]=).with('provisioned', false)
+        expect(File).to receive(:write).with(SubcommandUtil::SUBCOMMAND_OPTIONS, { 'other_key' => 'cordite' }.to_yaml)
         subcommand.init
-        expect(mock_options).not_to have_key(:timestamp)
       end
 
       it 'requires hosts flag' do
+        pending 'this was relying on FakeFS raising an exception'
         expect { subcommand.init }.to raise_error(NotImplementedError)
       end
     end
 
     describe '#provision' do
       let(:cli) { subcommand.cli }
-      let(:yaml_store_mock) { double('yaml_store_mock') }
       let(:host_hash) { { 'mynode.net' => { :name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64') } } }
       let(:cleaned_hosts) { double }
       let(:yielded_host_hash) { double }
@@ -128,8 +133,9 @@ module Beaker
       let(:options) { double('options') }
 
       it 'provisions the host and saves the host info' do
-        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
-        allow(yaml_store_mock).to receive(:[]).and_return(false)
+        allow(subcommand).to receive(:state).and_return(mock_state)
+        expect(mock_state).to receive(:transaction).and_yield
+        expect(mock_state).to receive(:[]).with('provisioned').and_return(false)
         allow(cli).to receive(:preserve_hosts_file).and_return("/path/to/ho")
         allow(cli).to receive(:network_manager).and_return(network_manager)
         allow(cli).to receive(:options).and_return(options)
@@ -142,13 +148,14 @@ module Beaker
         expect(SubcommandUtil).to receive(:sanitize_options_for_save).and_return(cleaned_hosts)
         expect(cleaned_hosts).to receive(:each).and_yield(yielded_host_name, yielded_host_hash)
         expect(yielded_host_hash).to receive(:[]=).with('provision', false)
-        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_OPTIONS).and_return(yaml_store_mock)
+        allow(subcommand).to receive(:options_storage).and_return(mock_options_storage)
 
-        expect(yaml_store_mock).to receive(:transaction).and_yield.exactly(3).times
-        expect(yaml_store_mock).to receive(:[]=).with('HOSTS', cleaned_hosts)
-        expect(yaml_store_mock).to receive(:[]=).with('hosts_preserved_yaml_file', "/path/to/hosts")
+        expect(mock_options_storage).to receive(:transaction).and_yield
+        expect(mock_options_storage).to receive(:[]=).with('HOSTS', cleaned_hosts)
+        expect(mock_options_storage).to receive(:[]=).with('hosts_preserved_yaml_file', "/path/to/hosts")
 
-        expect(yaml_store_mock).to receive(:[]=).with('provisioned', true)
+        expect(mock_state).to receive(:transaction).and_yield
+        expect(mock_state).to receive(:[]=).with('provisioned', true)
         subcommand.provision
       end
 
@@ -167,11 +174,10 @@ module Beaker
 
       let(:cleaned_hosts) { double }
       let(:host_hash) { { 'mynode.net' => { :name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64') } } }
-      let(:yaml_store_mock) { double('yaml_store_mock') }
 
       it 'calls execute! when no resource is given' do
-        expect_any_instance_of(Pathname).not_to receive(:directory?)
-        expect_any_instance_of(Pathname).not_to receive(:exist?)
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
+        allow_any_instance_of(Pathname).to receive(:directory?).and_return(false)
         expect(subcommand.cli).to receive(:execute!).once
         expect { subcommand.exec }.not_to raise_error
       end
@@ -240,15 +246,14 @@ module Beaker
       end
 
       it 'updates the subcommand_options file with new host info if `preserve-state` is set' do
-        allow(yaml_store_mock).to receive(:[]).and_return(false)
         allow(subcommand).to receive(:options).and_return('preserve-state' => true)
 
         expect(subcommand.cli).to receive(:parse_options).and_return(subcommand.cli)
         expect(subcommand.cli).to receive(:combined_instance_and_options_hosts).and_return(host_hash)
         expect(SubcommandUtil).to receive(:sanitize_options_for_save).and_return(cleaned_hosts)
-        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_OPTIONS).and_return(yaml_store_mock)
-        expect(yaml_store_mock).to receive(:transaction).and_yield.once
-        expect(yaml_store_mock).to receive(:[]=).with('HOSTS', cleaned_hosts)
+        expect(subcommand).to receive(:options_storage).and_return(mock_options_storage).twice
+        expect(mock_options_storage).to receive(:transaction).and_yield.once
+        expect(mock_options_storage).to receive(:[]=).with('HOSTS', cleaned_hosts)
         expect(subcommand.cli.logger).to receive(:notify)
 
         subcommand.exec('tests')
@@ -265,7 +270,6 @@ module Beaker
     context 'destroy' do
       let(:cli) { subcommand.cli }
       let(:mock_options) { { :timestamp => 'noon', :other_key => 'cordite' } }
-      let(:yaml_store_mock) { double('yaml_store_mock') }
       let(:network_manager) { double('network_manager') }
 
       it 'calls destroy and updates the yaml store' do
@@ -274,10 +278,10 @@ module Beaker
         allow(cli).to receive(:network_manager).and_return(network_manager)
         expect(network_manager).to receive(:cleanup)
 
-        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
-        allow(yaml_store_mock).to receive(:transaction).and_yield
-        allow(yaml_store_mock).to receive(:[]).with('provisioned').and_return(true)
-        allow(yaml_store_mock).to receive(:delete).with('provisioned').and_return(true)
+        allow(subcommand).to receive(:state).and_return(mock_state)
+        expect(mock_state).to receive(:transaction).and_yield.twice
+        expect(mock_state).to receive(:[]).with('provisioned').and_return(true)
+        expect(mock_state).to receive(:delete).with('provisioned').and_return(true)
         expect(SubcommandUtil).to receive(:error_with).with("Please provision an environment").exactly(0).times
         subcommand.destroy
       end

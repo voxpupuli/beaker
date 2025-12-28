@@ -10,7 +10,6 @@ module Beaker
 
     def initialize(*args)
       super
-      FileUtils.mkdir_p(SubcommandUtil::CONFIG_DIR)
       @cli = Beaker::CLI.new
     end
 
@@ -81,13 +80,13 @@ module Beaker
 
       @cli.parse_options
 
+      # TODO: use options_storage?
       options_to_write = SubcommandUtil.sanitize_options_for_save(@cli.configured_options)
 
       @cli.logger.notify 'Writing configured options to disk'
       File.write(SubcommandUtil::SUBCOMMAND_OPTIONS, options_to_write.to_yaml)
       @cli.logger.notify "Options written to #{SubcommandUtil::SUBCOMMAND_OPTIONS}"
 
-      state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
       state.transaction do
         state['provisioned'] = false
       end
@@ -106,7 +105,6 @@ module Beaker
         return
       end
 
-      state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
       SubcommandUtil.error_with('Provisioned SUTs detected. Please destroy and reprovision.') if state.transaction { state['provisioned'] }
 
       @cli.parse_options
@@ -123,7 +121,6 @@ module Beaker
 
       # should we only update the options here with the new host? Or update the settings
       # with whatever new flags may have been provided with provision?
-      options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
       options_storage.transaction do
         @cli.logger.notify 'updating HOSTS key in subcommand_options'
         options_storage['HOSTS'] = cleaned_hosts
@@ -195,7 +192,6 @@ module Beaker
 
       @cli.logger.notify 'updating HOSTS key in subcommand_options'
       hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
-      options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
       options_storage.transaction do
         options_storage['HOSTS'] = hosts
       end
@@ -212,7 +208,6 @@ module Beaker
         return
       end
 
-      state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
       SubcommandUtil.error_with('Please provision an environment') unless state.transaction { state['provisioned'] }
 
       @cli.parse_options
@@ -222,6 +217,24 @@ module Beaker
 
       state.transaction do
         state.delete('provisioned')
+      end
+    end
+
+    no_commands do
+      private
+
+      def state
+        @state ||= begin
+          FileUtils.mkdir_p(SubcommandUtil::CONFIG_DIR)
+          YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
+        end
+      end
+
+      def options_storage
+        @options_storage ||= begin
+          FileUtils.mkdir_p(SubcommandUtil::CONFIG_DIR)
+          YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
+        end
       end
     end
   end
