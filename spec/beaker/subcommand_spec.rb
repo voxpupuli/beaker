@@ -15,17 +15,6 @@ module Beaker
       describe 'File operation initialization for subcommands' do
         it 'checks to ensure subcommand file resources exist' do
           expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
-          expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
-          expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
-          subcommand
-        end
-
-        it 'touches the files when they do not exist' do
-          expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
-          allow(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(false)
-          allow(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(false)
-          expect(FileUtils).to receive(:touch).with(SubcommandUtil::SUBCOMMAND_OPTIONS)
-          expect(FileUtils).to receive(:touch).with(SubcommandUtil::SUBCOMMAND_STATE)
           subcommand
         end
       end
@@ -87,8 +76,6 @@ module Beaker
             allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
             allow(File).to receive(:open)
             allow_any_instance_of(Beaker::Logger).to receive(:notify).twice
-            expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
-            expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
 
             expect { described_class.start(['init', '--hosts', 'centos', "--#{option}"]) }.not_to output(/ERROR/).to_stderr
           end
@@ -100,8 +87,6 @@ module Beaker
         allow(yaml_store_mock).to receive(:transaction).and_yield
         allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
         expect(File).not_to receive(:open)
-        expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
-        expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
         expect { described_class.start(['init', '--hosts', 'centos', '--bad-option']) }.to output(/ERROR/).to_stderr
       end
     end

@@ -11,8 +11,6 @@ module Beaker
     def initialize(*args)
       super
       FileUtils.mkdir_p(SubcommandUtil::CONFIG_DIR)
-      FileUtils.touch(SubcommandUtil::SUBCOMMAND_OPTIONS) unless SubcommandUtil::SUBCOMMAND_OPTIONS.exist?
-      FileUtils.touch(SubcommandUtil::SUBCOMMAND_STATE) unless SubcommandUtil::SUBCOMMAND_STATE.exist?
       @cli = Beaker::CLI.new
     end
 
