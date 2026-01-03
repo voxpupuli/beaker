@@ -18,17 +18,21 @@ module Beaker
 
     describe '#state' do
       it 'ensures the parent directory exists' do
-        expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
-        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE)
-        subcommand.send(:state)
+        FakeFS.without do
+          expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
+          expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE)
+          subcommand.send(:state)
+        end
       end
     end
 
     describe '#options_storage' do
       it 'ensures the parent directory exists' do
-        expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
-        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_OPTIONS)
-        subcommand.send(:options_storage)
+        FakeFS.without do
+          expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
+          expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_OPTIONS)
+          subcommand.send(:options_storage)
+        end
       end
     end
 
