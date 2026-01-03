@@ -84,7 +84,7 @@ module Beaker
       options_to_write = SubcommandUtil.sanitize_options_for_save(@cli.configured_options)
 
       @cli.logger.notify 'Writing configured options to disk'
-      File.write(SubcommandUtil::SUBCOMMAND_OPTIONS, options_to_write.to_yaml)
+      SubcommandUtil::SUBCOMMAND_OPTIONS.write(options_to_write.to_yaml)
       @cli.logger.notify "Options written to #{SubcommandUtil::SUBCOMMAND_OPTIONS}"
 
       state.transaction do

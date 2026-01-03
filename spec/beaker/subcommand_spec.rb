@@ -84,7 +84,7 @@ module Beaker
             allow_any_instance_of(described_class).to receive(:state).and_return(mock_state)
             allow(mock_state).to receive(:transaction).and_yield
             allow(mock_state).to receive(:[]=).with('provisioned', false)
-            allow(File).to receive(:write).with(SubcommandUtil::SUBCOMMAND_OPTIONS, anything)
+            allow(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:write)
             allow_any_instance_of(Beaker::Logger).to receive(:notify).twice
 
             expect { described_class.start(['init', '--hosts', 'centos', "--#{option}"]) }.not_to output(/ERROR/).to_stderr
@@ -93,7 +93,7 @@ module Beaker
       end
 
       it "errors with a bad option here" do
-        expect(File).not_to receive(:write)
+        expect(SubcommandUtil::SUBCOMMAND_OPTIONS).not_to receive(:write)
         expect { described_class.start(['init', '--hosts', 'centos', '--bad-option']) }.to output(/ERROR/).to_stderr
       end
     end
@@ -111,7 +111,7 @@ module Beaker
         expect(subcommand).to receive(:state).and_return(mock_state).twice
         expect(mock_state).to receive(:transaction).and_yield
         expect(mock_state).to receive(:[]=).with('provisioned', false)
-        expect(File).to receive(:write).with(SubcommandUtil::SUBCOMMAND_OPTIONS, { 'other_key' => 'cordite' }.to_yaml)
+        expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:write).with({ 'other_key' => 'cordite' }.to_yaml)
         subcommand.init
       end
 
