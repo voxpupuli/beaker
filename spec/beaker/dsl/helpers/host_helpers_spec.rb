@@ -241,6 +241,23 @@ describe ClassMixedWithDSLHelpers do
       result_given = subject.retry_on(host, command, opts)
       expect(result_given.exit_code).to be === 0
     end
+
+    it 'operates correctly when host is an array' do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+
+      opts = {
+        :max_retries => 5,
+        :retry_interval => 0.0001,
+      }
+
+      allow(subject).to receive(:on).and_return(result)
+      expect(subject).to receive(:on).exactly(hosts.length).times
+
+      results = subject.retry_on(hosts, command, opts)
+      expect(results).to eq(Array.new(hosts.length, result))
+    end
   end
 
   describe "shell" do
