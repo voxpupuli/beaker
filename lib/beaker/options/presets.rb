@@ -37,6 +37,7 @@ module Beaker
         :test_tag_or => ['BEAKER_TEST_TAG_OR'],
         :test_tag_exclude => %w[BEAKER_EXCLUDE_TAG BEAKER_TEST_TAG_EXCLUDE],
         :run_in_parallel => ['BEAKER_RUN_IN_PARALLEL'],
+        :color => 'BEAKER_COLOR',
       }
 
       # Select all environment variables whose name matches provided regex
@@ -85,6 +86,18 @@ module Beaker
         end
         found_env_vars[:run_in_parallel] = found_env_vars[:run_in_parallel].split(',') if found_env_vars[:run_in_parallel]
 
+        # NO_COLOR is handled manually since it has inverted logic (presence means no color)
+        no_color_val = ENV['NO_COLOR']
+        beaker_color_val = found_env_vars[:color]
+
+        if beaker_color_val && !beaker_color_val.empty?
+          found_env_vars[:color] = !/^(no|false)$/i.match?(beaker_color_val)
+        elsif no_color_val && !no_color_val.empty?
+          found_env_vars[:color] = false
+        else
+          found_env_vars.delete(:color)
+        end
+
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
         found_env_vars
       end
@@ -98,7 +111,7 @@ module Beaker
         found = found.merge(format_found_env_vars(collect_env_vars(ENVIRONMENT_SPEC)))
         found[:answers] = select_env_by_regex('\\Aq_')
 
-        found.delete_if { |_key, value| value.nil? or value.empty? }
+        found.delete_if { |_key, value| value.nil? or (value.respond_to?(:empty?) && value.empty?) }
         found
       end
 
