@@ -557,25 +557,30 @@ module Beaker
           retry_interval        = option_retry_interval == 0 ? 1 : option_retry_interval
           verbose               = true.to_s == opts[:verbose]
 
-          log_prefix = host.log_prefix
-          logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command}"
-          logger.debug "  Trying command #{max_retries} times."
-          logger.debug ".", add_newline: false
+          block_opts = {}
+          block_opts[:run_in_parallel] = opts[:run_in_parallel] if opts.key?(:run_in_parallel)
 
-          result = on(host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &)
-          num_retries = 0
-          until desired_exit_codes.include?(result.exit_code)
-            sleep retry_interval
-            result = on(host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &)
-            num_retries += 1
+          block_on host, block_opts do |single_host|
+            log_prefix = single_host.log_prefix
+            logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command}"
+            logger.debug "  Trying command #{max_retries} times."
             logger.debug ".", add_newline: false
-            if (num_retries > max_retries)
-              logger.debug "  Command \`#{command}\` failed."
-              fail("Command \`#{command}\` failed.")
+
+            result = on(single_host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &)
+            num_retries = 0
+            until desired_exit_codes.include?(result.exit_code)
+              sleep retry_interval
+              result = on(single_host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &)
+              num_retries += 1
+              logger.debug ".", add_newline: false
+              if (num_retries > max_retries)
+                logger.debug "  Command \`#{command}\` failed."
+                fail("Command \`#{command}\` failed.")
+              end
             end
+            logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command} ostensibly successful."
+            result
           end
-          logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command} ostensibly successful."
-          result
         end
 
         # FIX: this should be moved into host/platform

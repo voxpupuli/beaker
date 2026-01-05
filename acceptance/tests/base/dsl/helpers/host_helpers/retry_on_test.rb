@@ -24,10 +24,7 @@ test_name "dsl::helpers::host_helpers #retry_on" do
     assert_equal "", result.stdout
   end
 
-  step "#retry_on CURRENTLY fails when provided a host array" do
-    # NOTE: would expect this to work across hosts, or be better documented and
-    #       to raise Beaker::Host::CommandFailure
-
+  step "#retry_on works when provided a host array" do
     remote_tmpdir = default.tmpdir
     remote_script_file = File.join(remote_tmpdir, "test.sh")
 
@@ -36,8 +33,13 @@ test_name "dsl::helpers::host_helpers #retry_on" do
       create_remote_file_from_fixture("retry_script", host, remote_tmpdir, "test.sh")
     end
 
-    assert_raises NoMethodError do
-      retry_on hosts, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
+    results = retry_on hosts, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
+
+    assert_kind_of Array, results
+    assert_equal hosts.length, results.length
+    results.each do |result|
+      assert_equal 0, result.exit_code
+      assert_equal "", result.stdout
     end
   end
 end
