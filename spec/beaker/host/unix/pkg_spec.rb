@@ -139,7 +139,7 @@ module Beaker
         it "uses apt-get for #{platform}" do
           @opts = { 'platform' => platform }
           pkg = 'pkg'
-          expect(Beaker::Command).to receive(:new).with("apt-get install --force-yes  -y #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
+          expect(Beaker::Command).to receive(:new).with("apt-get install  -y #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
           expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
           expect(instance.install_package(pkg)).to eq "hello"
         end
@@ -209,7 +209,7 @@ module Beaker
       PlatformHelpers::DEBIANPLATFORMS.each do |platform|
         it "calls the correct apt-get incantation for #{platform}" do
           @opts = { 'platform' => platform }
-          expect(Beaker::Command).to receive(:new).with("apt-get install -o Dpkg::Options::='--force-confold'  -y --force-yes pkg", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
+          expect(Beaker::Command).to receive(:new).with("apt-get install -o Dpkg::Options::='--force-confold'  -y pkg", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
           expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
           expect(instance.upgrade_package('pkg')).to eq "hello"
         end

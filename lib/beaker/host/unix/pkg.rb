@@ -96,7 +96,7 @@ module Unix::Pkg
     when /ubuntu|debian/
       name = "#{name}=#{version}" if version
       update_apt_if_needed
-      execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
+      execute("apt-get install #{cmdline_args} -y #{name}", opts)
     when /solaris-11/
       if opts[:acceptable_exit_codes]
         opts[:acceptable_exit_codes] << 4
@@ -204,7 +204,7 @@ module Unix::Pkg
       execute("yum -y #{cmdline_args} update #{name}", opts)
     when /ubuntu|debian/
       update_apt_if_needed
-      execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
+      execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y #{name}", opts)
     when /solaris-11/
       if opts[:acceptable_exit_codes]
         opts[:acceptable_exit_codes] << 4
