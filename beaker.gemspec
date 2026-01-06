@@ -33,6 +33,17 @@ Gem::Specification.new do |s|
   s.add_dependency 'minitest', '>= 5.4', '< 7'
   s.add_dependency 'rexml', '~> 3.2', '>= 3.2.5'
 
+  # readline is a bundled gem since Ruby 4
+  s.add_dependency 'readline', '~> 0.0.4'
+
+  # YAML::PStore depends on pstore, which is a bundled gem since Ruby 4
+  # https://github.com/ruby/yaml/issues/69
+  s.add_dependency 'pstore', '< 1'
+
+  # net-ssh needs logger
+  # https://github.com/net-ssh/net-ssh/pull/984
+  s.add_dependency 'logger', '< 2'
+
   # net-ssh compatibility with ed25519 keys
   s.add_dependency 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
   s.add_dependency 'ed25519', '>= 1.2', '<2.0'
