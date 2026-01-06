@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.3.0](https://github.com/voxpupuli/beaker/tree/7.3.0) (2026-01-06)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.2.2...7.3.0)
+
+**Implemented enhancements:**
+
+- Remove `--force-yes` from apt commands [\#1982](https://github.com/voxpupuli/beaker/pull/1982) ([bwitt](https://github.com/bwitt))
+- Lazily create options and state storage [\#1977](https://github.com/voxpupuli/beaker/pull/1977) ([ekohl](https://github.com/ekohl))
+- Add Ruby 4.0 support [\#1976](https://github.com/voxpupuli/beaker/pull/1976) ([bastelfreak](https://github.com/bastelfreak))
+
+**Fixed bugs:**
+
+- Allow `retry_on` to work for host array [\#1983](https://github.com/voxpupuli/beaker/pull/1983) ([bwitt](https://github.com/bwitt))
+
 ## [7.2.2](https://github.com/voxpupuli/beaker/tree/7.2.2) (2025-12-19)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/7.2.1...7.2.2)
