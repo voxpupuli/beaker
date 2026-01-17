@@ -29,7 +29,7 @@ describe Beaker do
 
   # cygwin Windows
   it_behaves_like 'enables_root_login', 'windows-11-64', [
-    "sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config",
+    "sed -ri 's/^#?PermitRootLogin /PermitRootLogin no/' /etc/sshd_config",
   ], true
 
   # FreeBSD
