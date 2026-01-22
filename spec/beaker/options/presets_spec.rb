@@ -23,6 +23,56 @@ module Beaker
         expect(env[:run_in_parallel]).to eq(%w[install configure])
       end
 
+      describe "color environment variables" do
+        after do
+          ENV.delete('NO_COLOR')
+          ENV.delete('BEAKER_COLOR')
+        end
+
+        it "disables color when NO_COLOR is set to any non-empty value" do
+          ENV['NO_COLOR'] = '1'
+          env = presets.env_vars
+          expect(env[:color]).to be false
+        end
+
+        it "does not set color when NO_COLOR is set to an empty string" do
+          ENV['NO_COLOR'] = ''
+          env = presets.env_vars
+          expect(env).not_to have_key(:color)
+        end
+
+        it "disables color when BEAKER_COLOR is set to 'no'" do
+          ENV['BEAKER_COLOR'] = 'no'
+          env = presets.env_vars
+          expect(env[:color]).to be false
+        end
+
+        it "disables color when BEAKER_COLOR is set to 'false'" do
+          ENV['BEAKER_COLOR'] = 'false'
+          env = presets.env_vars
+          expect(env[:color]).to be false
+        end
+
+        it "enables color when BEAKER_COLOR is set to 'yes'" do
+          ENV['BEAKER_COLOR'] = 'yes'
+          env = presets.env_vars
+          expect(env[:color]).to be true
+        end
+
+        it "enables color when BEAKER_COLOR is set to 'true'" do
+          ENV['BEAKER_COLOR'] = 'true'
+          env = presets.env_vars
+          expect(env[:color]).to be true
+        end
+
+        it "prioritizes BEAKER_COLOR over NO_COLOR" do
+          ENV['NO_COLOR'] = '1'
+          ENV['BEAKER_COLOR'] = 'yes'
+          env = presets.env_vars
+          expect(env[:color]).to be true
+        end
+      end
+
       it "removes all empty/nil entries in env_vars" do
         expect(presets.env_vars.has_value?(nil)).to be === false
         expect(presets.env_vars.has_value?({})).to be === false
