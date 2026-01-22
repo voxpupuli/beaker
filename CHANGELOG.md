@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.4.0](https://github.com/voxpupuli/beaker/tree/7.4.0) (2026-01-22)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.3.0...7.4.0)
+
+**Implemented enhancements:**
+
+- Respect no\_color [\#1980](https://github.com/voxpupuli/beaker/pull/1980) ([bwitt](https://github.com/bwitt))
+
+**Fixed bugs:**
+
+- Avoid duplicating PermitUserEnvironment [\#1954](https://github.com/voxpupuli/beaker/pull/1954) ([kajinamit](https://github.com/kajinamit))
+
+**Merged pull requests:**
+
+- Add rspec annotations to GitHub CI [\#1986](https://github.com/voxpupuli/beaker/pull/1986) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [7.3.0](https://github.com/voxpupuli/beaker/tree/7.3.0) (2026-01-06)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/7.2.2...7.3.0)
