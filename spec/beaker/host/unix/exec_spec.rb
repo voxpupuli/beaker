@@ -79,7 +79,7 @@ module Beaker
     describe '#ssh_permit_user_environment' do
       context 'When called without error' do
         let(:directory) { '/directory' }
-        let(:ssh_command) { "echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit" }
+        let(:ssh_command) { "sed -e 's/^PermitUserEnvironment .*/PermitUserEnvironment yes/' -e t -e '1s/^/PermitUserEnvironment yes\\n/' /etc/ssh/sshd_config > #{directory}/sshd_config.permit" }
         let(:ssh_move) { "mv #{directory}/sshd_config.permit /etc/ssh/sshd_config" }
 
         platforms = PlatformHelpers::REDHATPLATFORMS + PlatformHelpers::DEBIANPLATFORMS

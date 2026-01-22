@@ -302,7 +302,7 @@ module Unix::Exec
     case self['platform']
     when /amazon|debian|ubuntu|archlinux|el-|centos|fedora|redhat|oracle|scientific|opensuse|sles|solaris/
       directory = tmpdir
-      exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
+      exec(Beaker::Command.new("sed -e 's/^PermitUserEnvironment .*/PermitUserEnvironment yes/' -e t -e '1s/^/PermitUserEnvironment yes\\n/' /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
       exec(Beaker::Command.new("echo '' >/etc/environment")) if self['platform'].include?('ubuntu-')
     when /(free|open)bsd/
