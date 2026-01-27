@@ -10,7 +10,13 @@ RSpec.configure do |config|
   config.include HostHelpers
   # Use the GitHub Annotations formatter for CI
   if ENV['GITHUB_ACTIONS'] == 'true'
-    require 'rspec/github'
-    config.add_formatter RSpec::Github::Formatter
+    begin
+      require 'rspec/github'
+    rescue LoadError
+      # This is a development dependency, but beaker plugins reuse this and may
+      # not specify it
+    else
+      config.add_formatter RSpec::Github::Formatter
+    end
   end
 end
