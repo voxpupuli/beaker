@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.4.0](https://github.com/voxpupuli/beaker/tree/7.4.0) (2026-01-22)
+## [7.4.1](https://github.com/voxpupuli/beaker/tree/7.4.1) (2026-01-31)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.3.0...7.4.0)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.4.0...7.4.1)
+
+**Fixed bugs:**
+
+- Gracefully handle rspec-github not being present [\#1990](https://github.com/voxpupuli/beaker/pull/1990) ([ekohl](https://github.com/ekohl))
+
+## [v7.4.0](https://github.com/voxpupuli/beaker/tree/v7.4.0) (2026-01-22)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/7.3.0...v7.4.0)
 
 **Implemented enhancements:**
 
