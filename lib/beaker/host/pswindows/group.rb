@@ -2,10 +2,13 @@ module PSWindows::Group
   include Beaker::CommandFactory
 
   def group_list
-    execute('cmd /c echo "" | wmic group where localaccount="true" get name /format:value') do |result|
+    execute('powershell.exe -NoProfile -NonInteractive -Command "Get-CimInstance Win32_Group -Filter \'LocalAccount=True\' | Select-Object -ExpandProperty Name"') do |result|
       groups = []
       result.stdout.each_line do |line|
-        groups << (line.match(/^Name=(.+)$/) or next)[1]
+        group = line.strip
+        next if group.empty?
+
+        groups << group
       end
 
       yield result if block_given?
