@@ -213,7 +213,6 @@ Values already included in Beaker as defaults for required arguments.
           :type                   => 'pe',
           :provision              => true,
           :preserve_hosts         => 'never',
-          :root_keys              => false,
           :quiet                  => false,
           :project_root           => File.expand_path(File.join(__dir__, "../")),
           :xml_dir                => 'junit',
