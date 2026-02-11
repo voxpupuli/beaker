@@ -12,9 +12,6 @@ module Beaker
     TRIES = 5
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
-    ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
-    ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
-    ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
 
     # Run timesync on the provided hosts
     # @param [Host, Array<Host>] host One or more hosts to act upon
@@ -119,33 +116,6 @@ module Beaker
         end
       end
       raise error
-    end
-
-    # Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
-    # convenience method to allow for easy login to hosts after they have been provisioned with
-    # Beaker.
-    # @param [Host, Array<Host>] host One or more hosts to act upon
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    def sync_root_keys host, opts
-      # JJM This step runs on every system under test right now.  We're anticipating
-      # issues on Windows and maybe Solaris.  We will likely need to filter this step
-      # but we're deliberately taking the approach of "assume it will work, fix it
-      # when reality dictates otherwise"
-      logger = opts[:logger]
-      block_on host do |host|
-        logger.notify "Sync root authorized_keys from github on #{host.name}"
-        # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-        if host['platform'].include?('solaris')
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
-        elsif host['platform'].include?('aix')
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
-        else
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=\"/usr/gnu/bin:$PATH\" bash"), :accept_all_exit_codes => true)
-        end
-      end
-    rescue => e
-      report_and_raise(logger, e, "sync_root_keys")
     end
 
     # Run 'apt-get update' on the provided host or hosts.
