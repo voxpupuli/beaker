@@ -107,12 +107,6 @@ module Beaker
             @cmd_options[:exec_manual_tests] = bool
           end
 
-          opts.on '--root-keys',
-                  'Install puppetlabs pubkeys for superuser',
-                  '(default: false)' do |bool|
-            @cmd_options[:root_keys] = bool
-          end
-
           opts.on '--keyfile /PATH/TO/SSH/KEY',
                   'Specify alternate SSH key',
                   '(default: ~/.ssh/id_rsa)' do |key|

@@ -22,7 +22,6 @@
 :type: pe
 :provision: true
 :preserve_hosts: always
-:root_keys: false
 :quiet: false
 :project_root: "/path/to/project"
 :xml_dir: junit
@@ -311,7 +310,6 @@
   :type: pe
   :provision: false
   :preserve_hosts: always
-  :root_keys: false
   :quiet: false
   :project_root: "/path/to/project"
   :xml_dir: junit
