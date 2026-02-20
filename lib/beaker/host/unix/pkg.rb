@@ -37,7 +37,7 @@ module Unix::Pkg
         self[:sles_rpmkeys_nightly_pl_imported] = true
       end
       result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
-    when /amazon|fedora|centos|redhat|el-/
+    when /amazon|fedora|centos|redhat|el-|azure/
       result = execute("rpm -q #{name}", opts) { |result| result }
     when /ubuntu|debian/
       result = execute("dpkg -s #{name}", opts) { |result| result }
@@ -87,7 +87,7 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
-    when /amazon(fips)?-2023|el-(8|9|1[0-9])|fedora/
+    when /amazon(fips)?-2023|el-(8|9|1[0-9])|fedora|azure/
       name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
     when /amazon-(2|7)|centos|redhat|el-[1-7]-/
@@ -170,7 +170,7 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive rm #{name}", opts)
-    when /amazon(fips)?-2023|el-(8|9|1[0-9])|fedora/
+    when /amazon(fips)?-2023|el-(8|9|1[0-9])|fedora|azure/
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
     when /amazon-(2|7)|centos|redhat|el-[1-7]-/
       execute("yum -y #{cmdline_args} remove #{name}", opts)
@@ -198,7 +198,7 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
-    when /fedora/
+    when /fedora|azure/
       execute("dnf -y #{cmdline_args} update #{name}", opts)
     when /centos|redhat|el-/
       execute("yum -y #{cmdline_args} update #{name}", opts)
