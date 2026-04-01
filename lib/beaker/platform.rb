@@ -108,6 +108,8 @@ module Beaker
         true
       when 'el'
         @version.to_i >= 8
+      when 'debian'
+        @version.to_i >= 13
       else
         false
       end
