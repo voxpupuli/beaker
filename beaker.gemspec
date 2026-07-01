@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.0'
   s.add_development_dependency 'rspec-github', '~> 3.0'
-  s.add_development_dependency 'voxpupuli-rubocop', '~> 5.1.0'
+  s.add_development_dependency 'voxpupuli-rubocop', '~> 5.2.0'
 
   # Run time dependencies
   # Required for Ruby 3.3+ support
