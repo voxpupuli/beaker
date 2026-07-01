@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.4.1](https://github.com/voxpupuli/beaker/tree/7.4.1) (2026-01-31)
+## [7.5.0](https://github.com/voxpupuli/beaker/tree/7.5.0) (2026-07-01)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.4.0...7.4.1)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.4.1...7.5.0)
+
+**Implemented enhancements:**
+
+- \(maint\) Add Ubuntu 26.04 \(resolute\) codename mapping [\#2002](https://github.com/voxpupuli/beaker/pull/2002) ([SugatD](https://github.com/SugatD))
+
+## [v7.4.1](https://github.com/voxpupuli/beaker/tree/v7.4.1) (2026-01-31)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.4.0...v7.4.1)
 
 **Fixed bugs:**
 
