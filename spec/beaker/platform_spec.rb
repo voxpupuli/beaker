@@ -78,6 +78,11 @@ module Beaker
         expect(platform.with_version_codename).to be === 'debian-bullseye-xxx'
       end
 
+      it "can convert ubuntu-2604-xxx to ubuntu-resolute-xxx" do
+        @name = 'ubuntu-2604-xxx'
+        expect(platform.with_version_codename).to be === 'ubuntu-resolute-xxx'
+      end
+
       it "can convert ubuntu-2404-xxx to ubuntu-noble-xxx" do
         @name = 'ubuntu-2404-xxx'
         expect(platform.with_version_codename).to be === 'ubuntu-noble-xxx'
@@ -120,6 +125,11 @@ module Beaker
       it "can convert ubuntu-jammy-xxx to ubuntu-2204-xxx" do
         @name = 'ubuntu-jammy-xxx'
         expect(platform.with_version_number).to be === 'ubuntu-2204-xxx'
+      end
+
+      it "can convert ubuntu-resolute-xxx to ubuntu-2604-xxx" do
+        @name = 'ubuntu-resolute-xxx'
+        expect(platform.with_version_number).to be === 'ubuntu-2604-xxx'
       end
 
       %w[centos redhat].each do |p|
