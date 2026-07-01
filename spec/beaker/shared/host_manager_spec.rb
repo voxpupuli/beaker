@@ -150,7 +150,6 @@ module Beaker
 
         it "does not run in parallel if there is only 1 host in the array" do
           myhosts = host_handler.run_block_on([hosts[0]], nil, { :run_in_parallel => true }) do |host|
-            puts host
             host
           end
 
