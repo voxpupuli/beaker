@@ -21,15 +21,15 @@ module Beaker
     class RebootFailure < CommandFailure; end
     class RebootWarning < StandardError; end
 
-    # This class provides array syntax for using puppet --configprint on a host
+    # This class provides array syntax for using "puppet config print" on a host
     class PuppetConfigReader
-      def initialize(host, command)
+      def initialize(host, section)
         @host = host
-        @command = command
+        @section = section
       end
 
       def has_key?(k)
-        cmd = PuppetCommand.new(@command, '--configprint all')
+        cmd = PuppetCommand.new('config', 'print', "--section=#{@section}")
         keys = @host.exec(cmd).stdout.split("\n").collect do |x|
           x[/^[^\s]+/]
         end
@@ -37,7 +37,7 @@ module Beaker
       end
 
       def [](k)
-        cmd = PuppetCommand.new(@command, "--configprint #{k}")
+        cmd = PuppetCommand.new('config', 'print', "--section=#{@section}", k)
         @host.exec(cmd).stdout.strip
       end
     end
@@ -128,10 +128,11 @@ module Beaker
 
     # Returning our PuppetConfigReader here allows users of the Host
     # class to do things like `host.puppet['vardir']` to query the
-    # 'main' section or, if they want the configuration for a
-    # particular run type, `host.puppet('agent')['vardir']`
-    def puppet_configprint(command = 'agent')
-      PuppetConfigReader.new(self, command)
+    # 'agent' section or, if they want the configuration for a
+    # particular run type, `host.puppet('main')['vardir']`, or
+    # `host.puppet('server')['hostcert']`
+    def puppet_configprint(section = 'agent')
+      PuppetConfigReader.new(self, section)
     end
     alias puppet puppet_configprint
 
