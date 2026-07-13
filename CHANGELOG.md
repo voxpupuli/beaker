@@ -2,9 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.5.0](https://github.com/voxpupuli/beaker/tree/7.5.0) (2026-07-01)
+## [7.6.0](https://github.com/voxpupuli/beaker/tree/7.6.0) (2026-07-13)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.4.1...7.5.0)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.5.0...7.6.0)
+
+**Implemented enhancements:**
+
+- Update puppet\_configprint helper [\#2008](https://github.com/voxpupuli/beaker/pull/2008) ([Sharpie](https://github.com/Sharpie))
+
+**Fixed bugs:**
+
+- Ensure verify\_host\_key is symbolized before use [\#2010](https://github.com/voxpupuli/beaker/pull/2010) ([Sharpie](https://github.com/Sharpie))
+- Ensure .beaker dir exists before writing options [\#2009](https://github.com/voxpupuli/beaker/pull/2009) ([Sharpie](https://github.com/Sharpie))
+
+## [v7.5.0](https://github.com/voxpupuli/beaker/tree/v7.5.0) (2026-07-01)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.4.1...v7.5.0)
 
 **Implemented enhancements:**
 
