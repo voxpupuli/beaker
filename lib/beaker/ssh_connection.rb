@@ -76,6 +76,12 @@ module Beaker
           end
         end
 
+        # Beaker stringifies options when storing them in a config file.
+        # net-ssh raises a fatal error if it does not get a symbol.
+        if ssh_opts[:verify_host_key].is_a?(String)
+          ssh_opts[:verify_host_key] = ssh_opts[:verify_host_key].to_sym
+        end
+
         Net::SSH.start(host, user, ssh_opts)
       rescue *RETRYABLE_EXCEPTIONS => e
         if try <= max_connection_tries
