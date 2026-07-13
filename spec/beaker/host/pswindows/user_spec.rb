@@ -5,33 +5,17 @@ class PSWindowsUserTest
 end
 
 describe PSWindowsUserTest do
-  let(:wmic_output) do
+  let(:user_list_output) do
     <<~EOS
-      Name=Administrator
+      Administrator
 
+      bob foo
 
+      bob-dash
 
+      bob.foo
 
-
-      Name=bob foo
-
-
-
-
-
-      Name=bob-dash
-
-
-
-
-
-      Name=bob.foo
-
-
-
-
-
-      Name=cyg_server
+      cyg_server
 
 
 
@@ -42,22 +26,22 @@ describe PSWindowsUserTest do
 
     EOS
   end
-  let(:command) { 'cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value' }
+  let(:command) { %q(powershell.exe -NoProfile -NonInteractive -Command "Get-CimInstance Win32_UserAccount -Filter 'LocalAccount=True' | Select-Object -ExpandProperty Name") }
   let(:host) { double.as_null_object }
   let(:result) { Beaker::Result.new(host, command) }
 
   describe '#user_list' do
     it 'returns user names list correctly' do
-      result.stdout = wmic_output
+      result.stdout = user_list_output
       expect(subject).to receive(:execute).with(command).and_yield(result)
       expect(subject.user_list).to be === ['Administrator', 'bob foo', 'bob-dash', 'bob.foo', 'cyg_server']
     end
 
     it 'yields correctly with the result object' do
-      result.stdout = wmic_output
+      result.stdout = user_list_output
       expect(subject).to receive(:execute).and_yield(result)
       subject.user_list do |result|
-        expect(result.stdout).to be === wmic_output
+        expect(result.stdout).to be === user_list_output
       end
     end
   end

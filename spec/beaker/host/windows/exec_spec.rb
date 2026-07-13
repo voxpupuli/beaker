@@ -60,6 +60,14 @@ module Beaker
       end
     end
 
+    describe '#get_ip' do
+      it 'returns the first IPv4 address from CIM output' do
+        output = "fe80::1\n192.168.0.1\n10.0.0.2\n"
+        expect(instance).to receive(:execute).with(/Win32_NetworkAdapterConfiguration/).and_return(output)
+        expect(instance.get_ip).to eq('192.168.0.1')
+      end
+    end
+
     describe '#cygwin_installed?' do
       let(:response) { double('response') }
 
