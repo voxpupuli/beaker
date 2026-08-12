@@ -31,10 +31,24 @@ module Beaker
       return string.gsub(/\r\n?/, "\n")
     end
 
-    def convert string
-      # Remove invalid and undefined UTF-8 character encodings
-      string.to_s.force_encoding('UTF-8')
-      string.to_s.chars.select { |i| i.valid_encoding? }.join
+    # This method behaves differently when given a string instance, subclass
+    # or something else. The latter two cases should be deprecated.
+    def convert(string)
+      # guard against nil, which never worked on accident
+      raise TypeError, "Beaker::Result#convert cannot convert nil to a String" if string.nil?
+
+      unless string.instance_of?(String)
+        # For a string subclass, `string.to_s` returns a copy, so calling
+        # `force_encoding` on it was meaningless.
+        return string.to_s.scrub('')
+      end
+
+      # Data collected from the connection is binary (ASCII-8BIT). In that
+      # encoding, every byte is a valid character, so we tag the string as UTF-8
+      string.force_encoding('UTF-8')
+
+      # And remove invalid and undefined UTF-8 character encodings.
+      string.scrub('')
     end
 
     def log(logger)
