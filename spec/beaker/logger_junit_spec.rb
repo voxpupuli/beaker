@@ -32,6 +32,31 @@ module Beaker
         testing_string = 'pants man, pants!'
         expect(described_class.escape_invalid_xml_chars(testing_string)).to be === testing_string
       end
+
+      it 'escapes carriage returns, which is_valid_xml does not accept' do
+        expect(described_class.escape_invalid_xml_chars("a\rb")).to be === 'a\13b'
+      end
+
+      it 'agrees with is_valid_xml on every codepoint' do
+        # INVALID_XML_CHARS has to track is_valid_xml rather than the spec that
+        # method cites, so walk the whole range instead of trusting either.
+        codepoints = (0..0xD7FF).to_a + (0xE000..0x10FFFF).to_a # surrogates cannot be in a String
+        codepoints.each_slice(50_000) do |slice|
+          string = slice.map { |c| c.chr(Encoding::UTF_8) }.join
+          expected = slice.map { |c| described_class.is_valid_xml(c) ? c.chr(Encoding::UTF_8) : "\\#{c}" }.join
+          expect(described_class.escape_invalid_xml_chars(string)).to eq(expected)
+        end
+      end
+
+      it 'accepts a frozen string' do
+        expect(described_class.escape_invalid_xml_chars('pants'.freeze)).to eq('pants')
+      end
+    end
+
+    describe '#format_cdata' do
+      it 'strips colour codes and escapes what is left' do
+        expect(described_class.format_cdata("\e[00;33mpants\e[00;00m")).to eq('pants')
+      end
     end
 
     describe '#copy_stylesheet_into_xml_dir' do

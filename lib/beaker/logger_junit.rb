@@ -120,21 +120,25 @@ module Beaker
       self.escape_invalid_xml_chars(Logger.strip_color_codes(string))
     end
 
+    # Every character {is_valid_xml} rejects, as one pattern. Note that this
+    # tracks that method rather than the specification it cites: #xD is absent
+    # from both, and both take the last range as 0x100000 rather than the
+    # 0x10000 the specification gives. Changing either would change the
+    # contents of every junit report, so they are left alone here and the specs
+    # walk the whole range to keep the two in step.
+    INVALID_XML_CHARS = /[^\u{9}\u{A}\u{20}-\u{D7FF}\u{E000}-\u{FFFD}\u{100000}-\u{10FFFF}]/
+
     # Escape invalid XML UTF-8 codes from provided string, see http://www.w3.org/TR/xml/#charsets for valid
     # character specification
     # @param [String] string The string to remove invalid codes from
     # @return [String] Properly escaped string
     def self.escape_invalid_xml_chars string
-      escaped_string = ""
-      string.chars.each do |i|
-        char_as_codestring = i.unpack("U*").join
-        escaped_string << if self.is_valid_xml(char_as_codestring.to_i)
-                            i
-                          else
-                            "\\#{char_as_codestring}"
-                          end
-      end
-      escaped_string
+      # This walked the string a character at a time, unpacking each one into
+      # an array and joining it back into a string just to read its codepoint.
+      # That is around four objects per character, and it runs over the whole
+      # sublog of every test case at the end of a run: 28 million objects, and
+      # 98MB of permanently grown ruby heap, for a 6MB suite.
+      string.gsub(INVALID_XML_CHARS) { |char| "\\#{char.ord}" }
     end
 
     # Determine if the provided number falls in the range of accepted xml unicode values
