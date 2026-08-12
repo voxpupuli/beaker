@@ -69,8 +69,8 @@ module Beaker
           expect(result.convert(5)).to eq('5')
         end
 
-        it 'raises FrozenError on nil' do
-          expect { result.convert(nil) }.to raise_error(FrozenError, /modify frozen String: ""/)
+        it 'raises TypeError on nil' do
+          expect { result.convert(nil) }.to raise_error(TypeError, /cannot convert nil to a String/)
         end
       end
     end
