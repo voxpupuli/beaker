@@ -24,6 +24,24 @@ module Beaker
         valid_utf8.freeze
         expect(logger.convert(valid_utf8)).to be === valid_utf8
       end
+
+      it 'leaves the string it was given alone' do
+        expect(logger.convert(invalid_utf8)).not_to equal(invalid_utf8)
+        expect(invalid_utf8.bytes).to include(0xAD)
+      end
+
+      it 'converts each item of an array' do
+        expect(logger.convert([valid_utf8, invalid_utf8])).to eq([valid_utf8, valid_utf8])
+      end
+
+      it 'converts arrays of arrays' do
+        expect(logger.convert([[invalid_utf8], valid_utf8])).to eq([[valid_utf8], valid_utf8])
+      end
+
+      it 'converts anything that can describe itself' do
+        expect(logger.convert(42)).to eq('42')
+        expect(logger.convert(nil)).to eq('')
+      end
     end
 
     describe '#generate_dated_log_folder' do
