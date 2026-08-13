@@ -197,7 +197,7 @@ module Beaker
       else
         # Remove invalid and undefined UTF-8 character encodings
         string = string.to_s.dup.force_encoding('UTF-8')
-        return string.to_s.chars.select { |i| i.valid_encoding? }.join
+        string.scrub('')
       end
     end
 
