@@ -2,9 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.6.0](https://github.com/voxpupuli/beaker/tree/7.6.0) (2026-07-13)
+## [7.7.0](https://github.com/voxpupuli/beaker/tree/7.7.0) (2026-08-14)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.5.0...7.6.0)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.6.0...7.7.0)
+
+**Implemented enhancements:**
+
+- Add Ruby 4.0 support [\#2015](https://github.com/voxpupuli/beaker/pull/2015) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+**Fixed bugs:**
+
+- Stop Logger\#convert allocating a String per character [\#2021](https://github.com/voxpupuli/beaker/pull/2021) ([joshcooper](https://github.com/joshcooper))
+- Reduce Result allocations [\#2020](https://github.com/voxpupuli/beaker/pull/2020) ([joshcooper](https://github.com/joshcooper))
+- Reduce string allocations for junit results [\#2019](https://github.com/voxpupuli/beaker/pull/2019) ([joshcooper](https://github.com/joshcooper))
+
+## [v7.6.0](https://github.com/voxpupuli/beaker/tree/v7.6.0) (2026-07-13)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.5.0...v7.6.0)
 
 **Implemented enhancements:**
 
