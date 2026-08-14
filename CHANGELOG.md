@@ -1,5 +1,23 @@
 # Changelog
 
+## [6.9.0](https://github.com/voxpupuli/beaker/tree/6.9.0) (2026-08-14)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.8.1...6.9.0)
+
+**Implemented enhancements:**
+
+- \(maint\) Add Ubuntu 26.04 \(resolute\) codename mapping [\#2024](https://github.com/voxpupuli/beaker/pull/2024) ([bastelfreak](https://github.com/bastelfreak))
+
+**Fixed bugs:**
+
+- Ensure correct encoding for logging and fix performance bugs [\#2027](https://github.com/voxpupuli/beaker/pull/2027) ([bastelfreak](https://github.com/bastelfreak))
+- Don't lose a whole junit report to one bad byte [\#2026](https://github.com/voxpupuli/beaker/pull/2026) ([bastelfreak](https://github.com/bastelfreak))
+- Stop escape\_invalid\_xml\_chars allocating per character [\#2025](https://github.com/voxpupuli/beaker/pull/2025) ([bastelfreak](https://github.com/bastelfreak))
+
+**Closed issues:**
+
+- The tmpfile method in pswindows needs to implement the use of the extension parameter [\#1955](https://github.com/voxpupuli/beaker/issues/1955)
+
 ## [6.8.1](https://github.com/voxpupuli/beaker/tree/6.8.1) (2025-06-16)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/6.8.0...6.8.1)
