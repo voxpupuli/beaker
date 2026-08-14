@@ -25,7 +25,7 @@ jobs:
       - name: Run Rubocop
         run: bundle exec rake rubocop
       - id: ruby
-        uses: voxpupuli/ruby-version@656370e339050da63b86b1c631f5f88a3f4c0803 # 1.0.1
+        uses: voxpupuli/ruby-version@be0467ce7366d206b2e87f5b7a032a030120b7cb # 2.0.0
 
   test:
     name: "Ruby ${{ matrix.ruby }}"

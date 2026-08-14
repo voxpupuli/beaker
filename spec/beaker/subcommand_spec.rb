@@ -120,8 +120,8 @@ module Beaker
       end
 
       it 'requires hosts flag' do
-        pending 'this was relying on FakeFS raising an exception'
-        expect { subcommand.init }.to raise_error(NotImplementedError)
+        expect { described_class.start(['init']) }
+          .to output(/No value provided for required options '--hosts'/).to_stderr
       end
     end
 
