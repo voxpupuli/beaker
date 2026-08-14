@@ -48,6 +48,13 @@ module Beaker
         end
       end
 
+      it 'drops invalid encodings rather than raising' do
+        # TestSuiteResult calls format_cdata from inside a blanket rescue that
+        # abandons the whole junit document, so an exception raised here would
+        # cost the run its entire test report.
+        expect(described_class.escape_invalid_xml_chars("ok\xFFbad".b)).to eq('okbad')
+      end
+
       it 'accepts a frozen string' do
         expect(described_class.escape_invalid_xml_chars('pants'.freeze)).to eq('pants')
       end
@@ -56,6 +63,10 @@ module Beaker
     describe '#format_cdata' do
       it 'strips colour codes and escapes what is left' do
         expect(described_class.format_cdata("\e[00;33mpants\e[00;00m")).to eq('pants')
+      end
+
+      it 'survives invalid encodings' do
+        expect(described_class.format_cdata("\e[00;33mok\xFFbad".b)).to eq('okbad')
       end
     end
 

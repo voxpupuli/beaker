@@ -133,6 +133,15 @@ module Beaker
     # @param [String] string The string to remove invalid codes from
     # @return [String] Properly escaped string
     def self.escape_invalid_xml_chars string
+      # Bytes that are not valid in their own encoding cannot be represented in
+      # xml at all, and would make the gsub below raise. Drop them, the same
+      # way Logger#convert does further upstream. Raising matters more here
+      # than it might look: TestSuiteResult calls #format_cdata from inside a
+      # blanket rescue that abandons the whole junit document, so one stray
+      # byte in one sublog loses every test result for the run.
+      string = string.dup.force_encoding(Encoding::UTF_8) unless string.encoding == Encoding::UTF_8
+      string = string.scrub('') unless string.valid_encoding?
+
       # This walked the string a character at a time, unpacking each one into
       # an array and joining it back into a string just to read its codepoint.
       # That is around four objects per character, and it runs over the whole
