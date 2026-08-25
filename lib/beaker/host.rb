@@ -544,7 +544,7 @@ module Beaker
       # copied into the directory 'to_path'
       from_path += '/' if File.directory?(from_path) and not from_path.end_with?('/')
 
-      @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
+      @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}} with args: #{rsync_args}"
       result = Rsync.run(from_path, to_path, rsync_args)
       @logger.debug("rsync returned #{result.inspect}")
 
