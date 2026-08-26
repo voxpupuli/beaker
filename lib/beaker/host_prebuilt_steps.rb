@@ -84,6 +84,7 @@ module Beaker
     def host_packages(host)
       packages = host['platform'].base_packages
       if host.is_cygwin?
+        # If we run in poweshell, we don't need cygwin
         raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
 
         packages << 'curl'
