@@ -24,26 +24,16 @@ module Windows::Exec
   end
 
   def get_ip
-    # when querying for an IP this way the return value can be formatted like:
-    # IPAddress=
-    # IPAddress={"129.168.0.1"}
-    # IPAddress={"192.168.0.1","2001:db8:aaaa:bbbb:cccc:dddd:eeee:0001"}
+    ips = execute('powershell.exe -NoProfile -NonInteractive -Command "(Get-CimInstance Win32_NetworkAdapterConfiguration -Filter \'IPEnabled=True\' | ForEach-Object { $_.IPAddress })"')
 
-    ips = execute("wmic nicconfig where ipenabled=true GET IPAddress /format:list")
-
-    ip = ''
     ips.each_line do |line|
-      matches = line.split('=')
-      next if matches.length <= 1
+      ip = line.strip
+      next unless ip.match?(/^\d{1,3}(?:\.\d{1,3}){3}$/)
 
-      matches = matches[1].match(/^{"(.*?)"/)
-      next if matches.nil? || matches.captures.nil? || matches.captures.empty?
-
-      ip = matches.captures[0] if matches && matches.captures
-      break if ip != ''
+      return ip
     end
 
-    ip
+    ''
   end
 
   # Attempt to ping the provided target hostname
