@@ -2,9 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.7.0](https://github.com/voxpupuli/beaker/tree/7.7.0) (2026-08-14)
+## [7.8.0](https://github.com/voxpupuli/beaker/tree/7.8.0) (2026-09-02)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.6.0...7.7.0)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.9.0...7.8.0)
+
+**Implemented enhancements:**
+
+- Install iproute for ss for serverspec on Fedora [\#2031](https://github.com/voxpupuli/beaker/pull/2031) ([traylenator](https://github.com/traylenator))
+
+**Fixed bugs:**
+
+- rsync: improve argument logging [\#2030](https://github.com/voxpupuli/beaker/pull/2030) ([bastelfreak](https://github.com/bastelfreak))
+
+## [6.9.0](https://github.com/voxpupuli/beaker/tree/6.9.0) (2026-08-14)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.7.0...6.9.0)
+
+## [v7.7.0](https://github.com/voxpupuli/beaker/tree/v7.7.0) (2026-08-14)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.6.0...v7.7.0)
 
 **Implemented enhancements:**
 
