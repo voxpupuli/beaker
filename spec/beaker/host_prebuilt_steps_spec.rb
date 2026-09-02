@@ -332,7 +332,7 @@ describe Beaker do
     it "can validate Fedora hosts" do
       host = make_host('host', { :platform => 'fedora-32-x86_64' })
 
-      ['iputils'].each do |pkg|
+      ['iputils', 'iproute'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
