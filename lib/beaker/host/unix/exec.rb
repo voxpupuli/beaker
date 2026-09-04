@@ -283,7 +283,13 @@ module Unix::Exec
     when /(el|centos|redhat|oracle|scientific)-[0-6]\b/
       exec(Beaker::Command.new("/sbin/service sshd restart"))
     when /solaris/
-      exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
+      # svcadm restart is asynchronous and kills the sshd process our SSH
+      # session runs through.  Schedule the restart to happen after a short
+      # delay so the exec can return and the SSH channel can close cleanly
+      # before sshd goes down.  The caller (ssh_permit_user_environment)
+      # will close the connection and reconnect — beaker's SSH retry loop
+      # handles waiting for sshd to come back.
+      exec(Beaker::Command.new("nohup bash -c 'sleep 2 && svcadm restart svc:/network/ssh:default' >/dev/null 2>&1 &"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo /etc/rc.d/sshd restart"))
     when /opensuse|sles/
@@ -302,7 +308,15 @@ module Unix::Exec
     case self['platform']
     when /amazon|debian|ubuntu|archlinux|el-|centos|fedora|redhat|oracle|scientific|opensuse|sles|solaris/
       directory = tmpdir
-      exec(Beaker::Command.new("sed -e 's/^PermitUserEnvironment .*/PermitUserEnvironment yes/' -e t -e '1s/^/PermitUserEnvironment yes\\n/' /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
+      # Use grep to check if PermitUserEnvironment is already in the config.
+      # Solaris 10 sed does not support \n in replacement strings, so we
+      # cannot use a single sed to both substitute and insert.
+      cmd = "if grep -q '^PermitUserEnvironment' /etc/ssh/sshd_config; " \
+            "then sed 's/^PermitUserEnvironment .*/PermitUserEnvironment yes/' " \
+            "/etc/ssh/sshd_config > #{directory}/sshd_config.permit; " \
+            "else cp /etc/ssh/sshd_config #{directory}/sshd_config.permit && " \
+            "echo 'PermitUserEnvironment yes' >> #{directory}/sshd_config.permit; fi"
+      exec(Beaker::Command.new(cmd))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
       exec(Beaker::Command.new("echo '' >/etc/environment")) if self['platform'].include?('ubuntu-')
     when /(free|open)bsd/
