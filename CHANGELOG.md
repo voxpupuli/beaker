@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.8.0](https://github.com/voxpupuli/beaker/tree/7.8.0) (2026-09-02)
+## [7.8.1](https://github.com/voxpupuli/beaker/tree/7.8.1) (2026-09-04)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.9.0...7.8.0)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.0...7.8.1)
+
+**Fixed bugs:**
+
+- Install rootfiles on EL 8+ hosts [\#2033](https://github.com/voxpupuli/beaker/pull/2033) ([silug](https://github.com/silug))
+
+## [v7.8.0](https://github.com/voxpupuli/beaker/tree/v7.8.0) (2026-09-02)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/6.9.0...v7.8.0)
 
 **Implemented enhancements:**
 
