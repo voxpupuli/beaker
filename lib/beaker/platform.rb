@@ -120,7 +120,7 @@ module Beaker
     def base_packages
       case @variant
       when 'el'
-        @version.to_i >= 8 ? %w[iputils rootfiles] : %w[curl]
+        @version.to_i >= 8 ? %w[iputils iproute rootfiles] : %w[curl]
       when 'debian'
         %w[curl lsb-release]
       when 'freebsd'
