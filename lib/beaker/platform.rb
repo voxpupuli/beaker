@@ -111,6 +111,9 @@ module Beaker
         @version.to_i >= 8
       when 'debian'
         @version.to_i >= 13
+      when 'ubuntu'
+        # version may be '2604' or '26.04'
+        @version.delete('.').to_i >= 2604
       else
         false
       end
