@@ -95,6 +95,18 @@ module Beaker
             expect { instance.ssh_permit_user_environment }.not_to raise_error
           end
         end
+
+        context 'on Solaris' do
+          PlatformHelpers::SOLARISPLATFORMS.each do |platform|
+            it "calls the correct commands for #{platform}" do
+              opts['platform'] = platform
+              expect(instance).to receive(:exec).once
+              expect(Beaker::Command).to receive(:new).with("perl -i -0777 -pe 's/^#?PermitUserEnvironment\\b[^\\n]*/PermitUserEnvironment yes/m or s/\\z/PermitUserEnvironment yes\\n/' /etc/ssh/sshd_config")
+              expect(instance).to receive(:ssh_service_restart)
+              expect { instance.ssh_permit_user_environment }.not_to raise_error
+            end
+          end
+        end
       end
 
       it 'raises an error on unsupported platforms' do
