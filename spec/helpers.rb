@@ -136,4 +136,6 @@ module PlatformHelpers
     scientific
     archlinux
   ]
+
+  SOLARISPLATFORMS = %w[solaris10-SPARC solaris11-SPARC]
 end
