@@ -276,7 +276,7 @@ describe Beaker do
     it "can validate el-9 hosts" do
       host = make_host('host', { :platform => 'el-9-64' })
 
-      %w[iputils rootfiles].each do |pkg|
+      %w[iputils iproute rootfiles].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -321,7 +321,7 @@ describe Beaker do
     it "can validate RHEL8 hosts" do
       host = make_host('host', { :platform => 'el-8-64' })
 
-      %w[iputils rootfiles].each do |pkg|
+      %w[iputils iproute rootfiles].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
