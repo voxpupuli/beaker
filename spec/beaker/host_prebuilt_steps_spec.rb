@@ -280,6 +280,23 @@ describe Beaker do
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
+      # rootfiles alone is not enough in a container: its dotfiles are
+      # tmpfiles-created %ghost files, so the tmpfiles rule is applied too
+      expect(host).to receive(:exec).with(
+        satisfy { |cmd| cmd.command.include?('systemd-tmpfiles --create rootfiles.conf') && cmd.command.include?('/usr/share/rootfiles') },
+        { :accept_all_exit_codes => true },
+      ).once
+
+      subject.validate_host(host, options)
+    end
+
+    it "does not touch root's dotfiles on non-EL hosts" do
+      host = make_host('host', { :platform => 'debian-12-64' })
+      allow(host).to receive(:check_for_package).and_return(true)
+
+      expect(host).not_to receive(:exec).with(
+        satisfy { |cmd| cmd.command.include?('/usr/share/rootfiles') }, anything
+      )
 
       subject.validate_host(host, options)
     end
@@ -332,10 +349,15 @@ describe Beaker do
     it "can validate Fedora hosts" do
       host = make_host('host', { :platform => 'fedora-32-x86_64' })
 
-      ['iputils', 'iproute'].each do |pkg|
+      %w[iputils iproute rootfiles].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
+      # Fedora 43+ rootfiles is tmpfiles-based like EL 9+, so the rule is applied too
+      expect(host).to receive(:exec).with(
+        satisfy { |cmd| cmd.command.include?('systemd-tmpfiles --create rootfiles.conf') },
+        { :accept_all_exit_codes => true },
+      ).once
 
       subject.validate_host(host, options)
     end

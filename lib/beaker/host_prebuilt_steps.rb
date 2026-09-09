@@ -13,6 +13,13 @@ module Beaker
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
+    # Prefer the mechanism a booted host uses (the tmpfiles rule); fall back
+    # to copying the templates where systemd-tmpfiles is not available.
+    ROOT_DOTFILES_SYNC_CMD = 'if [ -f /usr/lib/tmpfiles.d/rootfiles.conf ] && command -v systemd-tmpfiles >/dev/null 2>&1; then ' \
+                             'systemd-tmpfiles --create rootfiles.conf; ' \
+                             'elif [ -d /usr/share/rootfiles ]; then ' \
+                             'for f in /usr/share/rootfiles/.[!.]*; do [ -e "/root/${f##*/}" ] || cp -p "$f" /root/; done; ' \
+                             'fi'
     ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
 
@@ -72,9 +79,39 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         check_and_install_packages_if_needed(host, host_packages(host))
+        ensure_root_dotfiles(host)
       end
     rescue => e
       report_and_raise(logger, e, "validate")
+    end
+
+    # Make sure root's shell dotfiles exist on EL 8+ and Fedora hosts.
+    #
+    # Since rootfiles 8.1-32 (EL 9+) and 9.0 (Fedora 43+), `/root/.bashrc`
+    # and friends are no longer shipped as regular files: they are %ghost
+    # entries that systemd-tmpfiles copies out of `/usr/share/rootfiles` at
+    # boot, per `/usr/lib/tmpfiles.d/rootfiles.conf`. Nothing else runs that
+    # rule -- the systemd package carries no tmpfiles file trigger -- so in a
+    # container, which is never booted, installing the package leaves /root
+    # without the dotfiles.
+    #
+    # That matters because a non-interactive bash started by sshd only
+    # sources `/etc/bashrc` (and from there `/etc/profile.d/*.sh`) through
+    # `~/.bashrc`. Without it, PATH additions made in profile.d, such as
+    # `/etc/profile.d/puppet-agent.sh`, never reach commands run over ssh.
+    #
+    # Apply the tmpfiles rule the way boot would, and fall back to copying
+    # the templates when systemd-tmpfiles is not installed. Either path only
+    # creates files that are missing, so this is a no-op on a booted host,
+    # on hosts whose rootfiles still ships the files directly (no rule and no
+    # `/usr/share/rootfiles`), and for any customised file already in /root.
+    #
+    # @param [Host] host Host to act on
+    def ensure_root_dotfiles(host)
+      platform = host['platform']
+      return unless (platform.variant == 'el' && platform.version.to_i >= 8) || platform.variant == 'fedora'
+
+      host.exec(Command.new(ROOT_DOTFILES_SYNC_CMD), :accept_all_exit_codes => true)
     end
 
     # Return a list of packages that should be present.
