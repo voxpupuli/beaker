@@ -2,9 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.8.1](https://github.com/voxpupuli/beaker/tree/7.8.1) (2026-09-04)
+## [7.8.2](https://github.com/voxpupuli/beaker/tree/7.8.2) (2026-09-09)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.0...7.8.1)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.1...7.8.2)
+
+**Fixed bugs:**
+
+- Create root's dotfiles on EL 8+ hosts \(the other half of \#2033\) [\#2037](https://github.com/voxpupuli/beaker/pull/2037) ([silug](https://github.com/silug))
+- Fix NTP on Ubuntu 26.04 by using chrony [\#2036](https://github.com/voxpupuli/beaker/pull/2036) ([bwitt](https://github.com/bwitt))
+- Install iproute on EL 8+ hosts [\#2035](https://github.com/voxpupuli/beaker/pull/2035) ([silug](https://github.com/silug))
+- Fix Debian 13 NTP setup by using chrony [\#1996](https://github.com/voxpupuli/beaker/pull/1996) ([treydock](https://github.com/treydock))
+
+## [v7.8.1](https://github.com/voxpupuli/beaker/tree/v7.8.1) (2026-09-04)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.0...v7.8.1)
 
 **Fixed bugs:**
 
