@@ -137,7 +137,7 @@ module Beaker
       when 'amazon', 'amazonfips'
         ['iputils']
       when 'fedora'
-        %w[iputils iproute]
+        %w[iputils iproute rootfiles]
       when 'aix', 'osx', 'windows'
         []
       else

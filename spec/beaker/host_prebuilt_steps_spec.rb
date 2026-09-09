@@ -349,10 +349,15 @@ describe Beaker do
     it "can validate Fedora hosts" do
       host = make_host('host', { :platform => 'fedora-32-x86_64' })
 
-      ['iputils', 'iproute'].each do |pkg|
+      %w[iputils iproute rootfiles].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
+      # Fedora 43+ rootfiles is tmpfiles-based like EL 9+, so the rule is applied too
+      expect(host).to receive(:exec).with(
+        satisfy { |cmd| cmd.command.include?('systemd-tmpfiles --create rootfiles.conf') },
+        { :accept_all_exit_codes => true },
+      ).once
 
       subject.validate_host(host, options)
     end

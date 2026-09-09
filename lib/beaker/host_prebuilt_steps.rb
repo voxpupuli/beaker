@@ -85,13 +85,13 @@ module Beaker
       report_and_raise(logger, e, "validate")
     end
 
-    # Make sure root's shell dotfiles exist on EL 8+ hosts.
+    # Make sure root's shell dotfiles exist on EL 8+ and Fedora hosts.
     #
-    # Since rootfiles 8.1-32 (EL 9+), `/root/.bashrc` and friends are no
-    # longer shipped as regular files: they are %ghost entries that
-    # systemd-tmpfiles copies out of `/usr/share/rootfiles` at boot, per
-    # `/usr/lib/tmpfiles.d/rootfiles.conf`. Nothing else runs that rule --
-    # the EL 9 systemd package carries no tmpfiles file trigger -- so in a
+    # Since rootfiles 8.1-32 (EL 9+) and 9.0 (Fedora 43+), `/root/.bashrc`
+    # and friends are no longer shipped as regular files: they are %ghost
+    # entries that systemd-tmpfiles copies out of `/usr/share/rootfiles` at
+    # boot, per `/usr/lib/tmpfiles.d/rootfiles.conf`. Nothing else runs that
+    # rule -- the systemd package carries no tmpfiles file trigger -- so in a
     # container, which is never booted, installing the package leaves /root
     # without the dotfiles.
     #
@@ -109,7 +109,7 @@ module Beaker
     # @param [Host] host Host to act on
     def ensure_root_dotfiles(host)
       platform = host['platform']
-      return unless platform.variant == 'el' && platform.version.to_i >= 8
+      return unless (platform.variant == 'el' && platform.version.to_i >= 8) || platform.variant == 'fedora'
 
       host.exec(Command.new(ROOT_DOTFILES_SYNC_CMD), :accept_all_exit_codes => true)
     end
