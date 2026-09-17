@@ -300,11 +300,13 @@ module Unix::Exec
   #   (from {#ssh_service_restart}).
   def ssh_permit_user_environment
     case self['platform']
-    when /amazon|debian|ubuntu|archlinux|el-|centos|fedora|redhat|oracle|scientific|opensuse|sles|solaris/
+    when /amazon|debian|ubuntu|archlinux|el-|centos|fedora|redhat|oracle|scientific|opensuse|sles/
       directory = tmpdir
       exec(Beaker::Command.new("sed -e 's/^PermitUserEnvironment .*/PermitUserEnvironment yes/' -e t -e '1s/^/PermitUserEnvironment yes\\n/' /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
       exec(Beaker::Command.new("echo '' >/etc/environment")) if self['platform'].include?('ubuntu-')
+    when /solaris/
+      exec(Beaker::Command.new("perl -i -0777 -pe 's/^#?PermitUserEnvironment\\b[^\\n]*/PermitUserEnvironment yes/m or s/\\z/PermitUserEnvironment yes\\n/' /etc/ssh/sshd_config"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), { :pty => true })
     else
