@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.8.2](https://github.com/voxpupuli/beaker/tree/7.8.2) (2026-09-09)
+## [7.8.3](https://github.com/voxpupuli/beaker/tree/7.8.3) (2026-09-17)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.1...7.8.2)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.2...7.8.3)
+
+**Fixed bugs:**
+
+- Fix Solaris sshd\_config editing in ssh\_permit\_user\_environment [\#2029](https://github.com/voxpupuli/beaker/pull/2029) ([shubhamshinde360](https://github.com/shubhamshinde360))
+
+## [v7.8.2](https://github.com/voxpupuli/beaker/tree/v7.8.2) (2026-09-09)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.1...v7.8.2)
 
 **Fixed bugs:**
 
