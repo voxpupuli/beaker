@@ -2,10 +2,13 @@ module PSWindows::User
   include Beaker::CommandFactory
 
   def user_list
-    execute('cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value') do |result|
+    execute('powershell.exe -NoProfile -NonInteractive -Command "Get-CimInstance Win32_UserAccount -Filter \'LocalAccount=True\' | Select-Object -ExpandProperty Name"') do |result|
       users = []
       result.stdout.each_line do |line|
-        users << (line.match(/^Name=(.+)/) or next)[1]
+        user = line.strip
+        next if user.empty?
+
+        users << user
       end
 
       yield result if block_given?
