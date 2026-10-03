@@ -1,12 +1,24 @@
 require 'socket'
 require 'timeout'
 require 'net/scp'
+require 'beaker/exceptions'
 
 module Beaker
   class SshConnection
     attr_accessor :logger, :ip, :vmhostname, :hostname, :ssh_connection_preference
 
     SUPPORTED_CONNECTION_METHODS = %i[ip vmhostname hostname]
+
+    # How many times to retry the initial ssh connection attempt before giving
+    # up, not counting that first attempt itself -- so up to this many + 1
+    # connection attempts are made in total.
+    DEFAULT_MAX_CONNECTION_TRIES = 11
+
+    # How many times to re-run a command whose connection died before the remote
+    # host ever started running it, not counting the first attempt itself -- so
+    # up to this many + 1 attempts are made in total. Nothing ran remotely in
+    # that case, so this defaults to a non-zero value.
+    DEFAULT_EXECUTE_RETRIES = 3
 
     RETRYABLE_EXCEPTIONS = [
       SocketError,
@@ -38,7 +50,7 @@ module Beaker
 
     def self.connect name_hash, user = 'root', ssh_opts = {}, options = {}
       connection = new name_hash, user, ssh_opts, options
-      connection.connect
+      connection.connect(options)
       connection
     end
 
@@ -63,7 +75,7 @@ module Beaker
       try = 1
       last_wait = 2
       wait = 3
-      max_connection_tries = options[:max_connection_tries] || 11
+      max_connection_tries = options[:max_connection_tries] || DEFAULT_MAX_CONNECTION_TRIES
       begin
         @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
 
@@ -196,29 +208,54 @@ module Beaker
 
     def try_to_execute command, options = {}, stdout_callback = nil, stderr_callback = stdout_callback
       result = Result.new(@hostname, command)
+      command_started = false
 
-      @ssh.open_channel do |channel|
-        request_terminal_for(channel, command) if options[:pty]
-
-        channel.exec(command) do |terminal, success|
-          raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
-
-          register_stdout_for terminal, result, stdout_callback
-          register_stderr_for terminal, result, stderr_callback
-          register_exit_code_for terminal, result
-
-          process_stdin_for(terminal, options[:stdin]) if options[:stdin]
-        end
-      end
-
-      # Process SSH activity until we stop doing that - which is when our
-      # channel is finished with...
       begin
+        @ssh.open_channel do |channel|
+          request_terminal_for(channel, command) if options[:pty]
+
+          channel.exec(command) do |terminal, success|
+            raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
+
+            # The remote host has accepted the exec request, so from here on the
+            # command may have side effects even if we never hear back about it.
+            command_started = true
+
+            register_stdout_for terminal, result, stdout_callback
+            register_stderr_for terminal, result, stderr_callback
+            register_exit_code_for terminal, result
+
+            process_stdin_for(terminal, options[:stdin]) if options[:stdin]
+          end
+        end
+
+        # Process SSH activity until we stop doing that - which is when our
+        # channel is finished with...
         @ssh.loop
       rescue *RETRYABLE_EXCEPTIONS => e
-        # this would indicate that the connection failed post execution, since the channel exec was successful
+        # net-ssh dispatches the open_channel and channel.exec callbacks from
+        # inside #loop rather than from the calls that registered them, so a
+        # failure anywhere above lands here. That means we cannot tell from the
+        # rescue site alone whether the remote host got as far as running
+        # anything -- command_started is what tells us that.
         @logger.warn "ssh channel on #{@hostname} received exception post command execution #{e.class.name} - #{e.message}"
         close
+
+        # An exit code means the command ran to completion and the connection
+        # only died on the way out, so the result is perfectly usable. Callers
+        # who asked for the connection to drop get the same treatment they
+        # always have: a warning, and whatever output we managed to collect.
+        unless result.exit_code || options[:expect_connection_failure] || options[:reset_connection]
+          result.finalize!
+          @logger.last_result = result
+          if command_started
+            raise CommandStartedFailure,
+                  "Connection to #{@hostname} failed while running the command: #{e.class.name} - #{e.message}"
+          else
+            raise CommandNotStartedFailure,
+                  "Connection to #{@hostname} failed before it could run the command: #{e.class.name} - #{e.message}"
+          end
+        end
       end
 
       result.finalize!
@@ -226,13 +263,58 @@ module Beaker
       result
     end
 
-    # Execute a command on a host, ensuring a connection exists first
+    # Execute a command on a host, ensuring a connection exists first, retrying
+    # the command if the connection fails underneath it
     #
     # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
     # @option options [Integer] :max_connection_tries {#connect_block} option (passed through {#connect})
     # @option options [Boolean] :silent {#connect_block} option (passed through {#connect})
+    # @option options [Integer] :execute_retries How many times to re-run a command whose
+    #                                            connection died before the remote host
+    #                                            started running it. Nothing ran remotely in
+    #                                            that case, so retrying is always safe
+    #                                            (default: {DEFAULT_EXECUTE_RETRIES})
+    # @option options [Boolean] :idempotent Set this for commands that are safe to run more
+    #                                       than once. Only then will a command the remote
+    #                                       host had *already started* be retried, since such
+    #                                       a command may have partially run (default: false)
     def execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
+      # Commands that deliberately tear down the connection must not be retried;
+      # a retry would fight the very failure the caller asked for.
+      if options[:expect_connection_failure] || options[:reset_connection]
+        return execute_once(command, options, stdout_callback, stderr_callback)
+      end
+
+      tries_left = (options[:execute_retries] || DEFAULT_EXECUTE_RETRIES).to_i
+      last_wait = 2
+      wait = 3
+
+      begin
+        execute_once(command, options, stdout_callback, stderr_callback)
+      rescue CommandExecutionFailure => e
+        if e.is_a?(CommandStartedFailure) && !options[:idempotent]
+          @logger.error "Not retrying command on #{@hostname}: the remote host had already started " \
+                        "running it, so it may have partially completed. Pass :idempotent => true " \
+                        "for commands that are safe to run more than once."
+          raise e
+        end
+
+        raise e if tries_left <= 0
+
+        @logger.warn "Retrying command on #{@hostname} in #{wait} seconds, will retry #{tries_left} times"
+        tries_left -= 1
+        sleep wait
+        (last_wait, wait) = wait, last_wait + wait
+        retry
+      end
+    end
+
+    # Execute a command on a host exactly once, ensuring a connection exists first
+    #
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    def execute_once command, options = {}, stdout_callback = nil,
+                     stderr_callback = stdout_callback
       # ensure that we have a current connection object
       connect(options)
       try_to_execute(command, options, stdout_callback, stderr_callback)
