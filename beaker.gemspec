@@ -52,7 +52,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'hocon', '~> 1.0'
   s.add_dependency 'inifile', '~> 3.0'
   s.add_dependency 'net-scp', '>= 1.2', '< 5.0'
-  s.add_dependency 'net-ssh', '~> 7.1'
+  s.add_dependency 'net-ssh', '>= 7.1', '< 9.0'
 
   s.add_dependency 'in-parallel', '>= 0.1', '< 2.0'
   s.add_dependency 'rsync', '~> 1.0.9'
