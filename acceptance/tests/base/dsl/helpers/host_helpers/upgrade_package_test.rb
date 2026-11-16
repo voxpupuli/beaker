@@ -31,7 +31,7 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
     confine :except, :hypervisor => 'docker'
 
     confine_block :to, :platform => /centos|el-\d/ do
-      step "#upgrade_package CURRENTLY does not fail on CentOS if unknown package is specified" do
+      step "#upgrade_package does not fail on CentOS if unknown package is specified" do
         # NOTE: I would expect this to fail with an Beaker::Host::CommandFailure,
         #       but maybe it's because yum doesn't really care:
         #
@@ -40,17 +40,26 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
         #       > Setting up Update Process
         #       > No package non-existent-package-name available.
         #       > No Packages marked for Update
+        #
+        #       Newer dnf based systems (el-8+) exit 1 instead:
+        #
+        #       > No match for argument: non-existent-package-name
+        #       > Error: No packages marked for upgrade.
 
-        result = upgrade_package default, "non-existent-package-name"
+        begin
+          result = upgrade_package hosts.first, "non-existent-package-name"
 
-        assert_match(/No Packages marked for Update/i, result)
+          assert_match(/No Packages marked for Update/i, result)
+        rescue Beaker::Host::CommandFailure => e
+          assert_match(/No match for argument|No packages marked for upgrade/i, e.message)
+        end
       end
     end
 
     confine_block :except, :platform => /centos|el-\d/ do
       step "#upgrade_package fails if package is not already installed" do
         assert_raises Beaker::Host::CommandFailure do
-          upgrade_package default, "non-existent-package-name"
+          upgrade_package hosts.first, "non-existent-package-name"
         end
       end
     end

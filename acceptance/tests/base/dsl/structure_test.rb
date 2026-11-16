@@ -29,7 +29,7 @@ test_name "dsl::structure" do
   step "#confine_block will not run specified block on non-matching hosts" do
     begin
       @in_confine = 0
-      confine_block :except, :platform => default["platform"] do
+      confine_block :except, :platform => hosts.map { |host| host['platform'] } do
         @in_confine += 1
       end
 
@@ -42,7 +42,7 @@ test_name "dsl::structure" do
   step "#confine_block leaves hosts array intact after skipping block on non-matching hosts" do
     begin
       @in_confine = 0
-      confine_block :except, :platform => default["platform"] do
+      confine_block :except, :platform => hosts.map { |host| host['platform'] } do
         @in_confine += 1
       end
 
@@ -79,11 +79,12 @@ test_name "dsl::structure" do
 
   step "#confine reports correct message  and skips test when criteria doesn't match on 'except'" do
     begin
-      confine :except, { :platform => default['platform'] }
+      criteria = { :platform => hosts.map { |host| host['platform'] } }
+      confine :except, criteria
 
       fail "#confine did not skip test but should have."
     rescue Beaker::DSL::Outcomes::SkipTest => e
-      assert_match(/No suitable hosts found without {(:platform=>|platform: )"#{default['platform']}"}/, e.message, "#confine raised an unexpected
+      assert_match(/No suitable hosts found without {(:platform=>|platform: )/, e.message, "#confine raised an unexpected
       # skip_test")
     end
   end

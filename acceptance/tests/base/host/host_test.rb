@@ -317,8 +317,12 @@ step "Ensure scp errors close the ssh connection" do
     # indirectly called by beaker's own SshConnection #close mehod. View
     # the source for further info:
     # https://github.com/net-ssh/net-sacp/blob/master/lib/net/scp.rb
-    assert_raises Net::SCP::Error do
+    # net-scp 4 no longer raises from #close, so accept both behaviors.
+    # The next step checks the connection is still usable.
+    begin
       create_remote_file(default, '/tmp/this/path/cannot/possibly/exist.txt', "contents")
+    rescue Net::SCP::Error
+      nil
     end
   end
 
@@ -332,8 +336,13 @@ step "Ensure scp errors close the ssh connection" do
     # use the Dir.mkdir method in the #download_start_state method.
     # See the source for further info:
     # https://github.com/net-ssh/net-sacp/blob/master/lib/net/scp/download.rb
-    assert_raises Errno::ENOENT do
+    #
+    # net-scp 4 no longer raises here, so accept both behaviors.
+    # The next step checks the connection is still usable.
+    begin
       scp_from default, '/tmp/path/dne/wtf/bbq', '/tmp/path/dne/wtf/bbq'
+    rescue Errno::ENOENT
+      nil
     end
   end
 
