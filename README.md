@@ -61,7 +61,7 @@ This gem is licensed under the Apache-2 license.
 ## Release information
 
 To make a new release, please do:
-* update the version in the gemspec file
+* update the version in the `lib/beaker/version.rb` file
 * Install gems with `bundle install --with release --path .vendor`
 * generate the changelog with `bundle exec rake changelog`
 * Check if the new version matches the closed issues/PRs in the changelog
