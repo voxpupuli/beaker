@@ -2,9 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.8.4](https://github.com/voxpupuli/beaker/tree/7.8.4) (2026-11-11)
+## [7.9.0](https://github.com/voxpupuli/beaker/tree/7.9.0) (2026-11-16)
 
-[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.3...7.8.4)
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.4...7.9.0)
+
+**Implemented enhancements:**
+
+- test\(acceptance\): support multi-platform hosts and current deps [\#2061](https://github.com/voxpupuli/beaker/pull/2061) ([alaunay](https://github.com/alaunay))
+
+**Fixed bugs:**
+
+- Various fixes for Windows and MacOS SUTs [\#2062](https://github.com/voxpupuli/beaker/pull/2062) ([nmburgan](https://github.com/nmburgan))
+
+## [v7.8.4](https://github.com/voxpupuli/beaker/tree/v7.8.4) (2026-11-11)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/v7.8.3...v7.8.4)
 
 **Fixed bugs:**
 
