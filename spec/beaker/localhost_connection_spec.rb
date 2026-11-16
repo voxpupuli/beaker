@@ -38,9 +38,27 @@ module Beaker
 
     describe '#execute' do
       it 'calls open3' do
-        expect(Open3).to receive(:capture3).with({}, 'my_command')
+        expect(Open3).to receive(:capture3).with({}, 'my_command', stdin_data: '')
         connection.connect
         expect(connection.execute('my_command')).to be_a Result
+      end
+
+      it 'passes the stdin option to the command' do
+        connection.connect
+        result = connection.execute('cat', stdin: 'some input')
+        expect(result.stdout).to eq('some input')
+      end
+
+      context 'with an ssh env file' do
+        let(:env_file) { Tempfile.new('ssh_env') }
+        let(:options) { { :logger => double('logger').as_null_object, :ssh_env_file => env_file.path } }
+
+        it 'passes its variables to the command' do
+          env_file.write("MY_VAR=a=b\n\nOTHER=c\nOTHER\n")
+          env_file.flush
+          connection.connect
+          expect(connection.execute('printf "$MY_VAR $OTHER"').stdout).to eq('a=b c')
+        end
       end
 
       it 'sets stdout, stderr and exitcode' do

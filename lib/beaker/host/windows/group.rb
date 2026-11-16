@@ -1,25 +1,13 @@
 module Windows::Group
   include Beaker::CommandFactory
 
-  def group_list
-    execute('cmd /c echo "" | wmic group where localaccount="true" get name /format:value') do |result|
-      groups = []
-      result.stdout.each_line do |line|
-        groups << (line.match(/^Name=(.+)$/) or next)[1]
-      end
-
-      yield result if block_given?
-
-      groups
-    end
-  end
-
   # using powershell commands as wmic is deprecated in windows 2025
   def group_list_using_powershell
     execute('cmd /c echo "" | powershell.exe "Get-LocalGroup | Select-Object -ExpandProperty Name"') do |result|
       groups = []
       result.stdout.each_line do |line|
-        groups << line.strip or next
+        name = line.strip
+        groups << name unless name.empty?
       end
 
       yield result if block_given?
@@ -27,6 +15,8 @@ module Windows::Group
       groups
     end
   end
+
+  alias group_list group_list_using_powershell
 
   def group_get(name)
     execute("net localgroup \"#{name}\"") do |result|

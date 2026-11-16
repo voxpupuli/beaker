@@ -320,7 +320,7 @@ describe ClassMixedWithDSLHelpers do
 
       expect(Tempfile).to receive(:open).and_yield(tmpfile)
 
-      expect(File).to receive(:open)
+      expect(File).to receive(:open).with('/local/path/to/blah', 'wb')
 
       expect(subject).to receive(:scp_to)
         .with(hosts, '/local/path/to/blah', '/remote/path', my_opts)

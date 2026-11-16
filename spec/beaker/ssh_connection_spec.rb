@@ -237,6 +237,23 @@ module Beaker
       it 'returns a result object' do
         expect(connection.scp_to '', '').to be_a Beaker::Result
       end
+
+      it 'reconnects when the connection was closed' do
+        allow(@mock_ssh).to receive(:closed?).and_return(false)
+        allow(@mock_ssh).to receive(:close)
+        connection.close
+        expect(Net::SSH).to receive(:start).with(ip, user, ssh_opts) { @mock_ssh }
+        expect(@mock_scp).to receive(:upload!).once
+        connection.scp_to '', ''
+      end
+
+      it 'raises when it cannot reconnect' do
+        allow(@mock_ssh).to receive(:closed?).and_return(false)
+        allow(@mock_ssh).to receive(:close)
+        connection.close
+        allow(Net::SSH).to receive(:start).and_return(nil)
+        expect { connection.scp_to '', '' }.to raise_error(RuntimeError, /Cannot connect/)
+      end
     end
 
     describe '#scp_from' do
@@ -262,6 +279,23 @@ module Beaker
 
       it 'returns a result object' do
         expect(connection.scp_from '', '').to be_a Beaker::Result
+      end
+
+      it 'reconnects when the connection was closed' do
+        allow(@mock_ssh).to receive(:closed?).and_return(false)
+        allow(@mock_ssh).to receive(:close)
+        connection.close
+        expect(Net::SSH).to receive(:start).with(ip, user, ssh_opts) { @mock_ssh }
+        expect(@mock_scp).to receive(:download!).once
+        connection.scp_from '', ''
+      end
+
+      it 'raises when it cannot reconnect' do
+        allow(@mock_ssh).to receive(:closed?).and_return(false)
+        allow(@mock_ssh).to receive(:close)
+        connection.close
+        allow(Net::SSH).to receive(:start).and_return(nil)
+        expect { connection.scp_from '', '' }.to raise_error(RuntimeError, /Cannot connect/)
       end
     end
   end

@@ -261,7 +261,8 @@ module Beaker
         # @return [Result] Returns the result of the underlying SCP operation.
         def create_remote_file(hosts, file_path, file_content, opts = {})
           Tempfile.open 'beaker' do |tempfile|
-            File.open(tempfile.path, 'w') { |file| file.puts file_content }
+            # Binary mode, so that Ruby on Windows doesn't turn line endings into CRLF
+            File.open(tempfile.path, 'wb') { |file| file.puts file_content }
 
             opts[:protocol] ||= 'scp'
             case opts[:protocol]

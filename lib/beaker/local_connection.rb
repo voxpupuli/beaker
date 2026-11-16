@@ -34,13 +34,13 @@ module Beaker
       ENV.replace(backup)
     end
 
-    def execute command, _options = {}, stdout_callback = nil, _stderr_callback = stdout_callback
+    def execute command, options = {}, stdout_callback = nil, _stderr_callback = stdout_callback
       result = Result.new(@hostname, command)
       envs = {}
       if File.readable?(@ssh_env_file)
         File.foreach(@ssh_env_file) do |line|
-          key, value = line.split('=')
-          envs[key] = value
+          key, value = line.chomp.split('=', 2)
+          envs[key] = value if value
         end
       end
 
@@ -48,7 +48,7 @@ module Beaker
         clean_env = ENV.reject { |k| /^BUNDLE|^RUBY|^GEM/.match?(k) }
 
         with_env(clean_env) do
-          std_out, std_err, status = Open3.capture3(envs, command)
+          std_out, std_err, status = Open3.capture3(envs, command, stdin_data: options[:stdin].to_s)
           result.stdout << std_out
           result.stderr << std_err
           result.exit_code = status.exitstatus

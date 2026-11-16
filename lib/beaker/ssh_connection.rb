@@ -290,6 +290,7 @@ module Beaker
     end
 
     def scp_to source, target, options = {}
+      connect
       local_opts = options.dup
       local_opts[:recursive] = File.directory?(source) if local_opts[:recursive].nil?
       local_opts[:chunk_size] ||= 16384
@@ -322,6 +323,7 @@ module Beaker
     end
 
     def scp_from source, target, options = {}
+      connect
       local_opts = options.dup
       local_opts[:recursive] = true if local_opts[:recursive].nil?
       local_opts[:chunk_size] ||= 16384
