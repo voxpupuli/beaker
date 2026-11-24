@@ -23,6 +23,13 @@ module Beaker
       expect(connection_constructor).to be_a described_class
     end
 
+    it 'self.connect passes options through to the instance connect call' do
+      instance = double('connection')
+      allow(described_class).to receive(:new).and_return(instance)
+      expect(instance).to receive(:connect).with(options)
+      described_class.connect name_hash, user, ssh_opts, options
+    end
+
     it 'connect creates a new connection' do
       expect(Net::SSH).to receive(:start).with(ip, user, ssh_opts).and_return(true)
       connection.connect
@@ -84,14 +91,117 @@ module Beaker
     end
 
     describe '#execute' do
-      it 'raises an error if it fails' do
+      before do
         mock_ssh = Object.new
         expect(Net::SSH).to receive(:start).with(ip, user, ssh_opts) { mock_ssh }
         connection.connect
+      end
 
+      it 'raises an error if it fails' do
         allow(subject).to receive(:try_to_execute) { raise Timeout::Error }
 
         expect { connection.execute('ls') }.to raise_error Timeout::Error
+      end
+
+      it 'retries automatically when the command never reached the remote host' do
+        expect(subject).to receive(:try_to_execute).ordered.and_raise(CommandNotStartedFailure, 'boom')
+        expect(subject).to receive(:try_to_execute).ordered.and_return(Result.new(hostname, 'ls'))
+
+        expect { connection.execute('ls') }.not_to raise_error
+      end
+
+      it 'does not retry a command the remote host had already started, by default' do
+        expect(subject).to receive(:try_to_execute).once.and_raise(CommandStartedFailure, 'boom')
+
+        expect { connection.execute('ls') }.to raise_error(CommandStartedFailure)
+      end
+
+      it 'retries a command the remote host had already started, when :idempotent is set' do
+        expect(subject).to receive(:try_to_execute).ordered.and_raise(CommandStartedFailure, 'boom')
+        expect(subject).to receive(:try_to_execute).ordered.and_return(Result.new(hostname, 'ls'))
+
+        expect { connection.execute('ls', :idempotent => true) }.not_to raise_error
+      end
+
+      it 'gives up once retries are exhausted' do
+        expect(subject).to receive(:try_to_execute).exactly(3).times.and_raise(CommandNotStartedFailure, 'boom')
+
+        expect { connection.execute('ls', :execute_retries => 2) }.to raise_error(CommandNotStartedFailure)
+      end
+
+      it 'bypasses the retry wrapper for :expect_connection_failure' do
+        expect(subject).to receive(:execute_once).once.and_return('result')
+
+        expect(connection.execute('ls', :expect_connection_failure => true)).to eq('result')
+      end
+
+      it 'bypasses the retry wrapper for :reset_connection' do
+        expect(subject).to receive(:execute_once).once.and_return('result')
+
+        expect(connection.execute('ls', :reset_connection => true)).to eq('result')
+      end
+    end
+
+    describe '#try_to_execute' do
+      # plain Objects (unlike doubles) still have Kernel#exec/#loop, and RSpec
+      # preserves a stubbed method's original visibility -- so stubbing
+      # :exec/:loop on an Object.new leaves them private and uncallable with
+      # an explicit receiver, exactly like the real channel.exec(...)/@ssh.loop calls.
+      let(:mock_ssh) { double('ssh') }
+      let(:mock_channel) { double('channel') }
+
+      before do
+        expect(Net::SSH).to receive(:start).with(ip, user, ssh_opts) { mock_ssh }
+        connection.connect
+        allow(mock_ssh).to receive(:closed?).and_return(false)
+        allow(mock_ssh).to receive(:close)
+        allow(mock_ssh).to receive(:open_channel).and_yield(mock_channel)
+        allow(mock_channel).to receive(:on_data)
+        allow(mock_channel).to receive(:on_extended_data)
+      end
+
+      context 'when the connection dies before the remote confirms it started the command' do
+        it 'raises CommandNotStartedFailure' do
+          allow(mock_channel).to receive(:exec) # never yields, so command_started stays false
+          allow(mock_ssh).to receive(:loop).and_raise(IOError)
+
+          expect { connection.try_to_execute('ls') }.to raise_error(CommandNotStartedFailure)
+        end
+      end
+
+      context 'when the connection dies after the remote confirms it started the command' do
+        it 'raises CommandStartedFailure' do
+          allow(mock_channel).to receive(:exec).and_yield(mock_channel, true)
+          allow(mock_channel).to receive(:on_request)
+          allow(mock_ssh).to receive(:loop).and_raise(IOError)
+
+          expect { connection.try_to_execute('ls') }.to raise_error(CommandStartedFailure)
+        end
+      end
+
+      context 'when the command already completed before the connection died' do
+        it 'returns the usable result without raising' do
+          allow(mock_channel).to receive(:exec).and_yield(mock_channel, true)
+          exit_data = Object.new
+          allow(exit_data).to receive(:read_long).and_return(0)
+          allow(mock_channel).to receive(:on_request).with('exit-status').and_yield(mock_channel, exit_data)
+          allow(mock_ssh).to receive(:loop).and_raise(IOError)
+
+          result = nil
+          expect { result = connection.try_to_execute('ls') }.not_to raise_error
+          expect(result.exit_code).to eq(0)
+        end
+      end
+
+      context 'when the caller passes :expect_connection_failure' do
+        it 'does not raise, even though the command never started' do
+          allow(mock_channel).to receive(:exec)
+          allow(mock_ssh).to receive(:loop).and_raise(IOError)
+
+          result = nil
+          expect { result = connection.try_to_execute('ls', :expect_connection_failure => true) }.not_to raise_error
+          expect(result.exit_code).to be_nil
+        end
       end
     end
 

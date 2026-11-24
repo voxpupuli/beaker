@@ -24,6 +24,22 @@ module Beaker
       expect(host['value']).to be === 'blarg'
     end
 
+    describe '#connection' do
+      before do
+        @options = { :max_connection_tries => 5, :silent => true }
+      end
+
+      it 'threads :max_connection_tries and :silent through to SshConnection.connect' do
+        expect(Beaker::SshConnection).to receive(:connect) do |_name_hash, _user, _ssh_opts, conn_options|
+          expect(conn_options[:max_connection_tries]).to eq(5)
+          expect(conn_options[:silent]).to eq(true)
+          double('connection').as_null_object
+        end
+
+        host.connection
+      end
+    end
+
     describe "host types" do
       let(:options) { Beaker::Options::OptionsHash.new }
 
