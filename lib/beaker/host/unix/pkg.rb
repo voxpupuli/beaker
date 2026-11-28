@@ -107,7 +107,7 @@ module Unix::Pkg
     when /solaris-10/
       if !check_for_command('pkgutil')
         # https://www.opencsw.org/package/pkgutil/
-        noask_text = self.noask_file_text
+        noask_text = self['platform'].noask_file_text
         noask_file = File.join(external_copy_base, 'noask')
         create_remote_file(self, noask_file, noask_text)
         execute("pkgadd -d http://get.opencsw.org/now -a #{noask_file} -n all", opts)
